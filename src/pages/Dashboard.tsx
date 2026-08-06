@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const modules = [
   { to: "/app/connect", icon: Heart, name: "CONNECT", desc: "Find your mentor match", color: "hsl(340 80% 60%)" },
-  { to: "/app/vault", icon: FolderLock, name: "VAULT", desc: "Manage your documents", color: "hsl(210 80% 60%)" },
+  { to: "/app/profile", icon: FolderLock, name: "PROFILE", desc: "Manage your details & documents", color: "hsl(210 80% 60%)" },
   { to: "/app/spark", icon: Sun, name: "SPARK", desc: "Daily motivation", color: "hsl(38 92% 55%)" },
   { to: "/app/pulse", icon: Bell, name: "PULSE", desc: "News & updates", color: "hsl(50 85% 55%)" },
   { to: "/app/societies", icon: Users, name: "SOCIETIES", desc: "Campus communities", color: "hsl(270 70% 65%)" },

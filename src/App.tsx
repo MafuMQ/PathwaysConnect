@@ -11,7 +11,7 @@ import Pulse from "./pages/Pulse.tsx";
 import Onboard from "./pages/Onboard.tsx";
 import Connect from "./pages/Connect.tsx";
 import Study from "./pages/Study.tsx";
-import Vault from "./pages/Vault.tsx";
+import Profile from "./pages/Profile.tsx";
 import Opps from "./pages/Opps.tsx";
 import More from "./pages/More.tsx";
 import AppLayout from "./components/layout/AppLayout.tsx";
@@ -44,7 +44,7 @@ const AppRoutes = () => (
       <Route path="onboard" element={<Onboard />} />
       <Route path="connect" element={<Connect />} />
       <Route path="study" element={<Study />} />
-      <Route path="vault" element={<Vault />} />
+      <Route path="profile" element={<Profile />} />
       <Route path="opps" element={<Opps />} />
       <Route path="more" element={<More />} />
     </Route>

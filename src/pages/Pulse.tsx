@@ -52,7 +52,7 @@ const Pulse = () => {
 
       <Card>
         <Eyebrow>What needs you today</Eyebrow>
-        <div className="flex gap-3 py-3 border-b border-[#E4E0D4] cursor-pointer" onClick={() => navigate('/app/vault')}>
+        <div className="flex gap-3 py-3 border-b border-[#E4E0D4] cursor-pointer" onClick={() => navigate('/app/profile')}>
           <div className="w-9 h-9 rounded-xl bg-[#F6EFD9] flex items-center justify-center text-lg">📂</div>
           <div><div className="font-bold text-[13.5px] text-[#1A3A5C]">2 documents missing in VAULT</div><div className="text-xs text-[#6B7688]">Matric results & proof of residence — needed for NSFAS.</div></div>
         </div>

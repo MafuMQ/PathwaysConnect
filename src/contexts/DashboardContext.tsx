@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { MENTORS, BAZAAR, TUTORS, SPARK } from '../data/dashboardData';
+import { useAuth } from './AuthContext';
 
 interface DashboardState {
   name: string;
@@ -37,27 +38,48 @@ interface DashboardContextType {
   donate: () => void;
   buyItem: (i: number) => void;
   bookTutor: (i: number) => void;
-  uploadDoc: (i: number) => void;
+  uploadDoc: (i: number) => Promise<void>;
+  deleteDoc: (i: number) => Promise<void>;
+  updateMark: (subject: string, score: number) => Promise<void>;
+  deleteMark: (subject: string) => Promise<void>;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
+const DEFAULT_MARKS: Record<string, number> = {};
+const DEFAULT_DOCS = [
+  { n: 'South African ID / Birth Certificate', ok: false, d: 'Required for all applications' },
+  { n: 'Grade 11 Report', ok: false, d: 'APS trigger active' },
+  { n: 'Grade 12 Report', ok: false, d: 'Required for university admission' },
+  { n: 'Parent/Guardian income proof (NSFAS)', ok: false, d: 'Required for funding' },
+  { n: 'Matric Results (NSC)', ok: false, d: 'Unlocks after results day' },
+  { n: 'Proof of residence', ok: false, d: 'Needed for NSFAS & some bursaries' },
+];
+
 export const DashboardProvider = ({ children }: { children: React.ReactNode }) => {
   const [S, setS] = useState<DashboardState>({
-    name: 'Sipho', role: 'Learner', faith: 'Christianity', career: 'Health Sciences',
+    name: '', role: 'Learner', faith: 'Christianity', career: 'Health Sciences',
     coins: 120, streak: 1, aps: null, ready: null,
-    marks: { 'Mathematics': 65, 'English HL': 72, 'Life Sciences': 60, 'Geography': 58, 'Afrikaans FAL': 55, 'History': 70, 'Life Orientation': 80 },
-    docs: [
-      { n: 'South African ID / Birth Certificate', ok: true, d: 'Uploaded 12 Apr' },
-      { n: 'Grade 11 Report', ok: true, d: 'Uploaded 14 Apr · APS trigger active' },
-      { n: 'Parent/Guardian income proof (NSFAS)', ok: true, d: 'Uploaded 14 Apr' },
-      { n: 'Matric Results (NSC)', ok: false, d: 'Unlocks after results day' },
-      { n: 'Proof of residence', ok: false, d: 'Needed for NSFAS & some bursaries' },
-    ],
+    marks: DEFAULT_MARKS,
+    docs: DEFAULT_DOCS,
     matches: [], deckIdx: 0,
     tx: [{ t: 'Welcome bonus — verified registration', v: 100 }, { t: 'Referred a new verified user', v: 20 }],
     applied: {}, answered: 0, correct: 0, mistakes: []
   });
+
+  const { user, updateProfile } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      setS(prev => ({
+        ...prev,
+        name: user.name || prev.name,
+        role: user.role || prev.role,
+        marks: user.marks !== undefined ? user.marks : DEFAULT_MARKS,
+        docs: user.docs !== undefined ? user.docs : DEFAULT_DOCS
+      }));
+    }
+  }, [user?.id]);
 
   const [modal, setModal] = useState<{ title: string; content: React.ReactNode } | null>(null);
   const [toast, setToast] = useState('');
@@ -132,18 +154,50 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
     showToast(`Booked! ${t.n} earns ${Math.round(t.r * .88)} PC instantly`);
   };
 
-  const uploadDoc = (i: number) => {
-    setS(prev => {
-      const newDocs = [...prev.docs];
-      newDocs[i] = { ...newDocs[i], ok: true, d: 'Uploaded just now · verified queue' };
-      return { ...prev, docs: newDocs };
-    });
+  const uploadDoc = async (i: number) => {
+    const newDocs = [...S.docs];
+    newDocs[i] = { ...newDocs[i], ok: true, d: 'Uploaded just now · verified queue' };
+    setS(prev => ({ ...prev, docs: newDocs }));
+    if (user) {
+      await updateProfile({ docs: newDocs });
+    }
     showToast('Uploaded & encrypted 🔒 Opportunity scores recalculated');
+  };
+
+  const deleteDoc = async (i: number) => {
+    const newDocs = [...S.docs];
+    if (DEFAULT_DOCS[i]) {
+      newDocs[i] = DEFAULT_DOCS[i];
+    } else {
+      newDocs[i] = { ...newDocs[i], ok: false, d: 'Removed' };
+    }
+    setS(prev => ({ ...prev, docs: newDocs }));
+    if (user) {
+      await updateProfile({ docs: newDocs });
+    }
+    showToast('Document removed 🗑️');
+  };
+
+  const updateMark = async (subject: string, score: number) => {
+    const newMarks = { ...S.marks, [subject]: score };
+    setS(prev => ({ ...prev, marks: newMarks }));
+    if (user) {
+      await updateProfile({ marks: newMarks });
+    }
+  };
+
+  const deleteMark = async (subject: string) => {
+    const newMarks = { ...S.marks };
+    delete newMarks[subject];
+    setS(prev => ({ ...prev, marks: newMarks }));
+    if (user) {
+      await updateProfile({ marks: newMarks });
+    }
   };
 
   return (
     <DashboardContext.Provider value={{
-      S, setS, modal, setModal, toast, showToast, updateCoins, handleOnboard, newSpark, sparkI, swipe, applyOpp, donate, buyItem, bookTutor, uploadDoc
+      S, setS, modal, setModal, toast, showToast, updateCoins, handleOnboard, newSpark, sparkI, swipe, applyOpp, donate, buyItem, bookTutor, uploadDoc, deleteDoc, updateMark, deleteMark
     }}>
       {children}
     </DashboardContext.Provider>

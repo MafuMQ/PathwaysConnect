@@ -59,17 +59,17 @@ const DashboardShell = () => {
   const isPulse = location.pathname === '/app' || location.pathname === '/app/';
 
   const navItems = {
-    Learner: [['pulse', '🏠', 'Pulse'], ['connect', '🤝', 'Connect'], ['study', '📚', 'Study'], ['vault', '📂', 'Vault'], ['opps', '🎯', 'Opps'], ['more', '✦', 'More']],
-    'Student Mentor': [['pulse', '🏠', 'Home'], ['connect', '🤝', 'Matches'], ['study', '📚', 'Study'], ['vault', '📂', 'Vault'], ['more', '✦', 'More']],
-    'Graduate Tutor': [['pulse', '🏠', 'Home'], ['vault', '📂', 'Vault'], ['more', '🛒', 'Bazaar']],
-    Donor: [['pulse', '🏠', 'Home'], ['opps', '💛', 'Fund'], ['more', '✦', 'More']],
-    Parent: [['pulse', '🏠', 'Child'], ['study', '📚', 'Study'], ['vault', '📂', 'Vault'], ['more', '✦', 'More']],
+    Learner: [['pulse', '🏠', 'Pulse'], ['connect', '🤝', 'Connect'], ['study', '📚', 'Study'], ['profile', '👤', 'Profile'], ['opps', '🎯', 'Opps'], ['more', '✦', 'More']],
+    'Student Mentor': [['pulse', '🏠', 'Home'], ['connect', '🤝', 'Matches'], ['study', '📚', 'Study'], ['profile', '👤', 'Profile'], ['more', '✦', 'More']],
+    'Graduate Tutor': [['pulse', '🏠', 'Home'], ['profile', '👤', 'Profile'], ['more', '🛒', 'Bazaar']],
+    Donor: [['pulse', '🏠', 'Home'], ['opps', '💛', 'Fund'], ['profile', '👤', 'Profile'], ['more', '✦', 'More']],
+    Parent: [['pulse', '🏠', 'Child'], ['study', '📚', 'Study'], ['profile', '👤', 'Profile'], ['more', '✦', 'More']],
   };
 
   const currentNav = navItems[S.role as keyof typeof navItems] || navItems.Learner;
 
   return (
-    <div className="h-[100dvh] w-full bg-[#F5F0E8] flex flex-col md:flex-row font-['Inter',sans-serif] overflow-hidden">
+    <div className="h-[100dvh] w-full bg-[#F5F0E8] text-[#10263D] flex flex-col md:flex-row font-['Inter',sans-serif] overflow-hidden">
       
       {/* Desktop Sidebar (hidden on mobile) */}
       {currentScreen !== 'onboard' && (

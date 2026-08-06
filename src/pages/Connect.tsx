@@ -50,7 +50,7 @@ const Connect = () => {
 
       <div className="flex justify-center gap-6">
         <button onClick={() => swipe(false, () => {})} className="w-16 h-16 rounded-full bg-white shadow-lg text-2xl text-[#C0392B] border-2 border-[#F2C6BF] flex items-center justify-center active:scale-90 transition-transform">✕</button>
-        <button onClick={() => swipe(true, () => navigate('/app/vault'))} className="w-16 h-16 rounded-full bg-gradient-to-br from-[#2E8B50] to-[#1E6B3C] shadow-lg text-2xl text-white flex items-center justify-center active:scale-90 transition-transform">♥</button>
+        <button onClick={() => swipe(true, () => navigate('/app/profile'))} className="w-16 h-16 rounded-full bg-gradient-to-br from-[#2E8B50] to-[#1E6B3C] shadow-lg text-2xl text-white flex items-center justify-center active:scale-90 transition-transform">♥</button>
       </div>
 
       <div className="h-px bg-[#E4E0D4] my-4"></div>
@@ -61,7 +61,7 @@ const Connect = () => {
             <div key={m.i} className="flex items-center gap-3 py-2 border-b border-[#E4E0D4]">
               <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: m.c }}>{m.i}</div>
               <div className="flex-1"><b className="font-['Inter'] text-[13px] text-[#1A3A5C]">{m.n}</b><div className="text-xs text-[#6B7688]">{m.inst}</div></div>
-              <Btn size="sm" color="ghost" onClick={() => navigate('/app/vault')}>Vault chat</Btn>
+              <Btn size="sm" color="ghost" onClick={() => navigate('/app/profile')}>Vault chat</Btn>
             </div>
           ))
         }
