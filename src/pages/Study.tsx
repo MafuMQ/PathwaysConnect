@@ -1,14 +1,32 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { useDashboard } from '@/contexts/DashboardContext';
-import { OPPS, CAREERS } from '@/data/dashboardData';
-import { evalOpp, calcAPS } from '@/data/dashboardData';
+import { OPPS, UNIS, evalOpp, calcAPS, LVL } from '@/data/dashboardData';
 import { Card, Eyebrow, Title, Sub, Pill, Btn } from '@/components/dashboard/ui/DashboardUI';
+import { X } from 'lucide-react';
+
+const VALID_SUBJECTS = [
+  'Mathematics', 'Mathematical Literacy', 'English HL', 'English FAL', 
+  'Afrikaans HL', 'Afrikaans FAL', 'Life Sciences', 'Physical Sciences', 
+  'Accounting', 'Business Studies', 'Economics', 'Geography', 'History', 
+  'Life Orientation', 'Tourism', 'Consumer Studies', 'Information Technology', 
+  'Computer Applications Technology'
+];
+
+const COURSES = [
+  { ic: "🚀", n: "Grade 10 IEB", type: "Progression", req: "Pass Grade 9 with 50% avg", aps: "N/A" },
+  { ic: "🌍", n: "Cambridge IGCSE", type: "Curriculum Shift", req: "Strong Math & English (60%+)", aps: "N/A" },
+  { ic: "🛠️", n: "TVET NCV Level 2", type: "Vocational", req: "Grade 9 pass", aps: "N/A" }
+];
 
 const Study = () => {
-  const { S } = useDashboard();
+  const { user } = useAuth();
+  const { S, updateMark, deleteMark, showToast } = useDashboard();
   const navigate = useNavigate();
-  const [studyTab, setStudyTab] = useState('dash');
+  const location = useLocation();
+  const [studyTab, setStudyTab] = useState(location.state?.tab || 'dash');
+  const [newSubject, setNewSubject] = useState("");
 
   const aps = calcAPS(S.marks);
   const evald = OPPS.map(o => ({ o, e: evalOpp(o, S.marks, S.career, S.docs) })).sort((a, b) => b.e.score - a.e.score);
@@ -20,9 +38,9 @@ const Study = () => {
       <Title>Learn smarter. Unlock your future.</Title>
       
       <div className="flex gap-1.5 my-3 overflow-x-auto pb-1">
-        {['dash', 'subjects', 'papers', 'ai', 'mistakes', 'twin', 'nbt', 'careers'].map(t => (
+        {['dash', 'courses', 'subjects', 'ai', 'twin', 'aps'].map(t => (
           <button key={t} onClick={() => setStudyTab(t)} className={`shrink-0 border rounded-full py-1.5 px-3.5 text-[11.5px] font-bold tracking-wide ${studyTab === t ? 'bg-[#1A3A5C] text-white border-[#1A3A5C]' : 'bg-white border-[#E4E0D4] text-[#6B7688]'}`}>
-            {t.charAt(0).toUpperCase() + t.slice(1)}
+            {t === 'aps' ? 'APS Calculator' : t.charAt(0).toUpperCase() + t.slice(1)}
           </button>
         ))}
       </div>
@@ -59,6 +77,43 @@ const Study = () => {
         </>
       )}
 
+      {studyTab === 'courses' && (
+        <div className="animate-in fade-in">
+          <Eyebrow>Current Course Profile</Eyebrow>
+          <Card className="mb-4 bg-gradient-to-br from-[#10263D] to-[#1A3A5C] text-white border-[#C9A84C]/45">
+            <div className="flex items-center gap-3">
+              <div className="text-4xl">🎓</div>
+              <div>
+                <div className="text-[10px] text-[#B9CBDD] uppercase font-bold tracking-wider mb-1">ENROLLED</div>
+                <div className="font-['Playfair_Display'] text-xl font-bold text-[#C9A84C]">
+                  {user?.curriculum || 'Curriculum not set'} · {user?.grade || 'Grade not set'}
+                </div>
+                <div className="text-xs mt-1 text-[#C8D6E5]">You are on track for progression.</div>
+              </div>
+            </div>
+          </Card>
+
+          <Eyebrow>Qualifying Next-Step Pathways</Eyebrow>
+          <Sub className="mb-3">Courses and curriculums you qualify for based on your current academic profile.</Sub>
+          {COURSES.map((c, i) => (
+            <Card key={i} className="mb-2">
+              <div className="flex items-center gap-3">
+                <div className="text-3xl">{c.ic}</div>
+                <div className="flex-1">
+                  <b className="font-['Playfair_Display'] text-[15.5px] text-[#1A3A5C]">{c.n}</b>
+                  <div className="text-xs text-[#6B7688]">Path: {c.type}</div>
+                </div>
+                <Pill color={c.type === 'Vocational' ? 'amber' : 'navy'}>{c.type === 'Progression' ? 'Direct' : 'Shift'}</Pill>
+              </div>
+              <div className="text-[12.5px] leading-relaxed mt-2 pt-2 border-t border-[#E4E0D4]">
+                📝 <b>Requirements:</b> {c.req}<br />
+                📊 <b>APS Impact:</b> {c.aps}
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
       {studyTab === 'subjects' && (
         <>
           <input className="w-full p-3 border border-[#E4E0D4] rounded-xl mb-3 outline-none" placeholder="🔍 Search all CAPS subjects…" />
@@ -75,16 +130,7 @@ const Study = () => {
         </>
       )}
 
-      {studyTab === 'papers' && (
-        <Card>
-          <Eyebrow>Past Paper Centre™</Eyebrow>
-          <div className="text-sm space-y-2 mt-2">
-            <div className="flex justify-between p-2 border rounded-lg cursor-pointer">📍 Gauteng</div>
-            <div className="flex justify-between p-2 border rounded-lg cursor-pointer">📍 KwaZulu-Natal</div>
-            <div className="flex justify-between p-2 border rounded-lg cursor-pointer">📍 DBE National</div>
-          </div>
-        </Card>
-      )}
+
 
       {studyTab === 'ai' && (
         <Card>
@@ -101,17 +147,7 @@ const Study = () => {
         </Card>
       )}
 
-      {studyTab === 'mistakes' && (
-        <Card>
-          <Eyebrow>AI Mistake Book™</Eyebrow>
-          <Sub className="mb-3">Every wrong answer is stored forever.</Sub>
-          <div className="text-center py-8">
-            <div className="text-4xl mb-2">📗</div>
-            <b className="font-['Inter'] text-[#1A3A5C]">No mistakes recorded yet</b>
-            <div className="text-xs text-[#6B7688] mt-1">Do a practice session — every slip becomes tomorrow's mastery.</div>
-          </div>
-        </Card>
-      )}
+
 
       {studyTab === 'twin' && (
         <Card>
@@ -127,41 +163,98 @@ const Study = () => {
         </Card>
       )}
 
-      {studyTab === 'nbt' && (
+      {studyTab === 'aps' && (
         <Card>
-          <Eyebrow>NBT Academy™</Eyebrow>
-          <b className="font-['Playfair_Display'] text-[15px] text-[#1A3A5C]">NBT AQL — Academic & Quantitative Literacy</b>
-          <Sub className="mt-1 mb-3">Required by UCT, Wits, UP. Includes Pathways AQL study booklet.</Sub>
-          <div className="flex gap-2">
-            <Btn size="sm" color="navy" className="flex-1">Timed test</Btn>
-            <Btn size="sm" color="ghost" className="flex-1">Study booklet</Btn>
+          <Eyebrow>Vault intelligence</Eyebrow>
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <Title>APS Calculator</Title>
+              <Sub>Best 6 subjects count, excluding Life Orientation.</Sub>
+            </div>
+            <Btn size="sm" color="ghost" onClick={() => showToast('Coming soon: Extract subjects from uploaded report!')}>Analyse / Extract Report</Btn>
+          </div>
+          
+          <table className="w-full text-sm mb-4">
+            <thead>
+              <tr className="text-[10px] text-[#6B7688] uppercase border-b">
+                <th className="text-left py-2">Subject</th>
+                <th>%</th>
+                <th>Level</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(S.marks).map(([s, p]) => (
+                <tr key={s} className="border-b">
+                  <td className="py-3 font-bold text-[#1A3A5C]">{s}</td>
+                  <td className="text-center">
+                    <input 
+                      type="number" 
+                      value={p as number} 
+                      onChange={e => updateMark(s, Math.min(100, Math.max(0, +e.target.value || 0)))}
+                      className="w-14 p-1 border rounded-md text-center font-bold text-[#1A3A5C]"
+                    />
+                  </td>
+                  <td className="text-center font-bold text-[#6B7688]">LVL {LVL(p as number)}</td>
+                  <td className="text-right">
+                    <button onClick={() => deleteMark(s)} className="text-[#C0392B] p-1.5 hover:bg-red-50 rounded-lg transition-colors" title="Remove subject">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="mt-2 mb-6 p-3 bg-[#F9F9F8] rounded-xl border border-[#E4E0D4]">
+            <div className="relative">
+              <input 
+                value={newSubject}
+                onChange={e => setNewSubject(e.target.value)}
+                placeholder="Search and add a subject..."
+                className="w-full border border-[#E4E0D4] rounded-lg p-2.5 text-sm font-semibold text-[#1A3A5C] outline-none focus:border-[#C9A84C] bg-[#F9F9F8]"
+              />
+              {newSubject && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-[#E4E0D4] rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {VALID_SUBJECTS.filter(s => s.toLowerCase().includes(newSubject.toLowerCase()) && S.marks[s] === undefined).length > 0 ? (
+                    VALID_SUBJECTS.filter(s => s.toLowerCase().includes(newSubject.toLowerCase()) && S.marks[s] === undefined).map(sub => (
+                      <div 
+                        key={sub}
+                        className="p-2 text-sm text-[#1A3A5C] font-semibold hover:bg-[#F6EFD9] cursor-pointer border-b last:border-0 border-[#E4E0D4]"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          updateMark(sub, 0);
+                          setNewSubject("");
+                        }}
+                      >
+                        {sub}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-2 text-sm text-[#6B7688] italic">No matching subjects found.</div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-[#10263D] to-[#1A3A5C] text-white rounded-2xl p-4 text-center">
+            <div className="text-[10.5px] tracking-[2px] font-bold text-[#B9CBDD]">YOUR APS SCORE</div>
+            <div className="font-['Playfair_Display'] font-black text-4xl text-[#C9A84C] my-1">{aps}</div>
+            <div className="text-[10.5px] tracking-[2px] font-bold text-[#B9CBDD]">{aps >= 32 ? 'STRONG — UNIVERSITY RANGE' : aps >= 26 ? 'SOLID — MULTIPLE PATHWAYS' : 'BUILDING — TVET ROUTES OPEN'}</div>
+          </div>
+
+          <div className="mt-6">
+            <Eyebrow>Your university options · Career: {S.career}</Eyebrow>
+            {UNIS.filter(u => u.cat === 'uni' && aps >= u.min).map(u => (
+              <div key={u.n} className="border border-[#E4E0D4] rounded-xl p-3 mb-2 bg-white">
+                <b className="font-['Playfair_Display']">{u.n}</b>
+                <div className="text-xs text-[#6B7688] mt-1">{u.course} · APS {u.min}–{u.max} · Apply by {u.deadline}</div>
+                <Btn size="sm" color="green" className="mt-2" onClick={() => showToast('Application started 📌')}>Apply now</Btn>
+              </div>
+            ))}
           </div>
         </Card>
-      )}
-
-      {studyTab === 'careers' && (
-        <>
-          <Eyebrow>Career Explorer</Eyebrow>
-          <Sub className="mb-3">The full chain: APS → subjects → salary → universities → funding → mentor.</Sub>
-          {CAREERS.map(c => (
-            <Card key={c.n}>
-              <div className="flex items-center gap-3">
-                <div className="text-3xl">{c.ic}</div>
-                <div className="flex-1">
-                  <b className="font-['Playfair_Display'] text-[15.5px] text-[#1A3A5C]">{c.n}</b>
-                  <div className="text-xs text-[#6B7688]">{c.demand}</div>
-                </div>
-                <Pill color={parseInt(c.aps) <= aps ? 'green' : 'amber'}>APS {c.aps}</Pill>
-              </div>
-              <div className="text-[12.5px] leading-relaxed mt-2">
-                📚 <b>Subjects:</b> {c.subj}<br />
-                💵 <b>Salary:</b> {c.sal}<br />
-                🏛️ <b>Universities:</b> {c.unis}<br />
-                💰 <b>Funding:</b> {c.fund}
-              </div>
-            </Card>
-          ))}
-        </>
       )}
     </div>
   );

@@ -19,6 +19,8 @@ export interface UserProfile {
   institution?: string;
   avatar?: string;
   bio?: string;
+  grade?: string;
+  curriculum?: string;
   marks?: Record<string, number>;
   docs?: Array<{ n: string, ok: boolean, d: string }>;
 }
@@ -31,7 +33,7 @@ interface AuthContextType {
   loginWithGoogle: (role?: UserRole, institution?: string) => Promise<void>;
   signup: (data: { email: string; password: string; name: string; role: UserRole; institution?: string }) => Promise<void>;
   logout: () => Promise<void>;
-  updateProfile: (data: Partial<Pick<UserProfile, "name" | "institution" | "bio" | "role" | "marks" | "docs">>) => Promise<void>;
+  updateProfile: (data: Partial<Pick<UserProfile, "name" | "institution" | "bio" | "role" | "grade" | "curriculum" | "marks" | "docs">>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -118,7 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await signOut(auth);
   };
 
-  const updateProfile = async (data: Partial<Pick<UserProfile, "name" | "institution" | "bio" | "role" | "marks" | "docs">>) => {
+  const updateProfile = async (data: Partial<Pick<UserProfile, "name" | "institution" | "bio" | "role" | "grade" | "curriculum" | "marks" | "docs">>) => {
     if (!user) return;
     const docRef = doc(db, "users", user.id);
     await updateDoc(docRef, data);
