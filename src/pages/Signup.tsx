@@ -25,8 +25,12 @@ const Signup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRole) return;
-    await signup({ email, password, name, role: selectedRole, institution });
-    navigate("/app");
+    try {
+      await signup({ email, password, name, role: selectedRole, institution });
+      navigate("/app");
+    } catch (error) {
+      console.error("Signup failed", error);
+    }
   };
 
   return (

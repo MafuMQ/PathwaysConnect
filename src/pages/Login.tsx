@@ -7,19 +7,26 @@ import { LOGO_SRC } from "@/data/landingData";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(email, password);
-    navigate("/app");
+    try {
+      await login(email, password);
+      navigate("/app");
+    } catch (error) {
+      console.error("Login failed", error);
+    }
   };
 
   const handleGoogleLogin = async () => {
-    // Mock Google login
-    await login("google_user@example.com", "mock_pass");
-    navigate("/app");
+    try {
+      await loginWithGoogle();
+      navigate("/app");
+    } catch (error) {
+      console.error("Google login failed", error);
+    }
   };
 
   return (
