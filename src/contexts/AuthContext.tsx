@@ -26,7 +26,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
+  loginWithGoogle: (role?: UserRole, institution?: string) => Promise<void>;
   signup: (data: { email: string; password: string; name: string; role: UserRole; institution?: string }) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<Pick<UserProfile, "name" | "institution" | "bio" | "role">>) => Promise<void>;
@@ -74,7 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = async (role?: UserRole, institution?: string) => {
     const result = await signInWithPopup(auth, googleProvider);
     const firebaseUser = result.user;
     
@@ -82,11 +82,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const docRef = doc(db, "users", firebaseUser.uid);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) {
-      const newProfile = {
+      const newProfile: any = {
         email: firebaseUser.email || "",
         name: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "User",
       };
+      if (role) newProfile.role = role;
+      if (institution) newProfile.institution = institution;
       await setDoc(docRef, newProfile);
+    } else if (role && !docSnap.data().role) {
+      // If doc exists but has no role, update it
+      await updateDoc(docRef, { 
+        role, 
+        ...(institution ? { institution } : {}) 
+      });
     }
   };
 

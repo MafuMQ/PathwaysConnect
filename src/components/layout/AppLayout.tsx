@@ -1,6 +1,8 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { DashboardProvider, useDashboard } from "@/contexts/DashboardContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { LogOut } from "lucide-react";
 import { LOGO_SRC } from "@/data/landingData";
 import { Btn, Eyebrow } from "@/components/dashboard/ui/DashboardUI";
 
@@ -40,8 +42,18 @@ const NavBtnMobile = ({ active, icon, label, onClick }: { active: boolean, icon:
 
 const DashboardShell = () => {
   const { S, modal, setModal, toast } = useDashboard();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   const currentScreen = location.pathname.split('/').pop() || 'pulse';
   const isPulse = location.pathname === '/app' || location.pathname === '/app/';
@@ -93,9 +105,18 @@ const DashboardShell = () => {
             })}
           </nav>
           
-          <div className="p-4 border-t border-white/10 shrink-0 bg-black/10">
-            <div className="font-bold text-sm truncate">{S.name}</div>
-            <div className="text-xs text-[#8FA5BB] mt-0.5">{S.role}</div>
+          <div className="p-4 border-t border-white/10 shrink-0 bg-black/10 flex justify-between items-center">
+            <div className="min-w-0">
+              <div className="font-bold text-sm truncate">{S.name}</div>
+              <div className="text-xs text-[#8FA5BB] mt-0.5 truncate">{S.role}</div>
+            </div>
+            <button 
+              onClick={handleLogout} 
+              className="text-[#8FA5BB] hover:text-white transition-colors ml-3 p-1.5 rounded-lg hover:bg-white/10 shrink-0" 
+              title="Logout"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
         </aside>
       )}
@@ -107,11 +128,17 @@ const DashboardShell = () => {
         {currentScreen !== 'onboard' && (
           <div className="md:hidden bg-gradient-to-br from-[#10263D] to-[#1A3A5C] text-white p-3 flex items-center gap-2 shrink-0 z-30 shadow-md">
             <img src={LOGO_SRC} alt="Logo" className="w-8 h-auto" />
-            <div className="flex-1">
-              <b className="font-['Playfair_Display'] font-bold text-base tracking-wide text-white">JER<span className="text-[#C9A84C]">NUA</span>MBO</b>
+            <div className="flex-1 min-w-0">
+              <b className="font-['Playfair_Display'] font-bold text-base tracking-wide text-white truncate block">JER<span className="text-[#C9A84C]">NUA</span>MBO</b>
               <small className="block text-[8px] tracking-[3px] text-[#C9A84C] font-bold">— PATHWAYS —</small>
             </div>
-            <button onClick={() => setModal({ title: 'Wallet', content: <WalletModal /> })} className="bg-white/10 border border-[#C9A84C]/55 rounded-full py-1.5 px-3 text-xs font-bold text-[#F3E4B8] flex items-center gap-1.5">
+            <button 
+              onClick={handleLogout} 
+              className="text-[#8FA5BB] hover:text-white transition-colors p-1"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+            <button onClick={() => setModal({ title: 'Wallet', content: <WalletModal /> })} className="bg-white/10 border border-[#C9A84C]/55 rounded-full py-1.5 px-3 text-xs font-bold text-[#F3E4B8] flex items-center gap-1.5 ml-1">
               <span className="w-3 h-3 rounded-full bg-gradient-to-br from-[#F0DCA0] to-[#A8862F]"></span>
               {S.coins} PC
             </button>
