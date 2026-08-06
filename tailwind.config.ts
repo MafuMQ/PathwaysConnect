@@ -57,6 +57,29 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        navy: {
+          DEFAULT: "#1A3A5C",
+          deep: "#12293F",
+          tint: "#24486E",
+        },
+        gold: {
+          DEFAULT: "#C9A84C",
+          soft: "#DFC98A",
+          deep: "#A8873A",
+        },
+        green: {
+          DEFAULT: "#1E6B3C",
+          deep: "#164F2D",
+        },
+        orange: {
+          DEFAULT: "#C4651A",
+        },
+        cream: {
+          DEFAULT: "#F5F0E8",
+        },
+        charcoal: {
+          DEFAULT: "#2D2D2D",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -64,8 +87,8 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
-        body: ['"DM Sans"', 'system-ui', 'sans-serif'],
+        display: ['"Oswald"', 'system-ui', 'sans-serif'],
+        body: ['"Public Sans"', 'system-ui', 'sans-serif'],
       },
       keyframes: {
         "accordion-down": {

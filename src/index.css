@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 @tailwind base;
@@ -6,6 +7,24 @@
 
 @layer base {
   :root {
+    /* JERNUAMBO PATHWAYS — OFFICIAL DESIGN TOKENS */
+    --navy: #1A3A5C;
+    --gold: #C9A84C;
+    --green: #1E6B3C;
+    --orange: #C4651A;
+    --white: #FFFFFF;
+    --cream: #F5F0E8;
+    --charcoal: #2D2D2D;
+    --navy-deep: #12293F;
+    --navy-tint: #24486E;
+    --gold-soft: #DFC98A;
+    --gold-deep: #A8873A;
+    --green-deep: #164F2D;
+    --muted: #5C6672;
+    --line: #E3DCCE;
+    --ok: #1E6B3C;
+    --warn: #C4651A;
+    
     --background: 220 20% 7%;
     --foreground: 40 20% 95%;
 

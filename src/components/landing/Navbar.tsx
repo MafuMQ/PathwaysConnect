@@ -1,38 +1,47 @@
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Compass } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { LOGO_SRC } from '../../data/landingData';
 
-const Navbar = () => {
+export const Navbar = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
-    <motion.nav
-      className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl"
-      initial={{ y: -60, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="container mx-auto px-6 h-16 flex items-center justify-between max-w-6xl">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <Compass className="w-4 h-4 text-primary-foreground" />
-          </div>
-          <span className="font-display font-bold text-lg text-foreground">
-            Pathways<span className="text-primary">Connect</span>
-          </span>
-        </div>
+    <header className="sticky top-0 z-50 bg-[#1A3A5C] border-b border-white/10">
+      <div className="max-w-[1180px] mx-auto px-4 md:px-6 flex items-center justify-between py-2.5">
+        <a href="#home" aria-label="Jernuambo Pathways home" className="flex items-center z-50 relative">
+          <img src={LOGO_SRC} alt="Jernuambo Pathways" className="h-10 md:h-16 w-auto" />
+        </a>
+        
+        <nav className={`${menuOpen ? 'fixed inset-0 bg-[#1A3A5C] flex flex-col items-center justify-center gap-8 z-40' : 'hidden'} md:flex md:items-center md:gap-6 md:static md:bg-transparent md:flex-row`}>
+          <a href="#home" onClick={() => setMenuOpen(false)} className="text-[#E9EDF3] font-semibold text-2xl md:text-sm hover:text-[#C9A84C] transition-colors">Home</a>
+          <a href="#gateway" onClick={() => setMenuOpen(false)} className="text-[#E9EDF3] font-semibold text-2xl md:text-sm hover:text-[#C9A84C] transition-colors">Get Support</a>
+          <a href="#opportunities" onClick={() => setMenuOpen(false)} className="text-[#E9EDF3] font-semibold text-2xl md:text-sm hover:text-[#C9A84C] transition-colors">Opportunities</a>
+          <a href="#resources" onClick={() => setMenuOpen(false)} className="text-[#E9EDF3] font-semibold text-2xl md:text-sm hover:text-[#C9A84C] transition-colors">Resources</a>
+          <a href="#branches" onClick={() => setMenuOpen(false)} className="text-[#E9EDF3] font-semibold text-2xl md:text-sm hover:text-[#C9A84C] transition-colors">Branches</a>
+          <a href="#trust" onClick={() => setMenuOpen(false)} className="text-[#E9EDF3] font-semibold text-2xl md:text-sm hover:text-[#C9A84C] transition-colors">Trust Centre</a>
+          <a href="#contact" onClick={() => setMenuOpen(false)} className="text-[#E9EDF3] font-semibold text-2xl md:text-sm hover:text-[#C9A84C] transition-colors">Contact</a>
+        </nav>
 
-        <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-          <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-          <a href="#users" className="hover:text-foreground transition-colors">For Who</a>
-          <a href="#" className="hover:text-foreground transition-colors">About</a>
+        <div className="flex items-center gap-2 md:gap-4 z-50 relative">
+          <a href="#contact" className="hidden lg:inline-flex items-center gap-2 bg-[#C9A84C] text-[#1A3A5C] uppercase font-['Oswald',sans-serif] tracking-wider font-semibold text-xs py-3 px-5 rounded-lg hover:translate-y-[-2px] hover:shadow-lg transition-all whitespace-nowrap">
+            Get Learner Support
+          </a>
+          <Link to="/login" className="inline-flex items-center justify-center rounded-full border border-white/70 px-3 py-1.5 md:px-5 md:py-2.5 text-xs md:text-sm font-semibold text-white transition-all hover:bg-white hover:text-[#1A3A5C] whitespace-nowrap">
+            Log In
+          </Link>
+          <Link to="/signup" className="inline-flex items-center justify-center rounded-full bg-[#C9A84C] px-3 py-1.5 md:px-5 md:py-2.5 text-xs md:text-sm font-bold text-[#1A3A5C] transition-all hover:bg-[#b5953e] hover:shadow-md whitespace-nowrap">
+            Sign Up
+          </Link>
+          <button 
+            className="md:hidden bg-transparent border border-white/35 rounded-lg text-white px-2 py-1 text-lg cursor-pointer flex items-center justify-center"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Open menu"
+            aria-expanded={menuOpen}
+          >
+            {menuOpen ? '✕' : '☰'}
+          </button>
         </div>
-
-        <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold" asChild>
-          <Link to="/signup">Sign Up</Link>
-        </Button>
       </div>
-    </motion.nav>
+    </header>
   );
 };
-
-export default Navbar;
