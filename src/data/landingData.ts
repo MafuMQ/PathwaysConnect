@@ -20,29 +20,7 @@ export const CAMPAIGN = {
 
 export const SHOW_UNVERIFIED = false;
 
-export const OPPORTUNITIES = [
-  {
-    type: 'Bursary', title: 'NSFAS Bursary — 2027 Academic Year',
-    org: 'National Student Financial Aid Scheme', where: 'National',
-    closes: null, closesText: 'Opening dates to be confirmed',
-    link: 'https://www.nsfas.org.za', docs: 'ID, proof of income, academic results',
-    verified: false, demo: true, lastChecked: 'July 2026'
-  },
-  {
-    type: 'University', title: '2027 University Applications — Public Universities',
-    org: 'Various institutions', where: 'National',
-    closes: null, closesText: 'Most close between June and September 2026',
-    link: 'https://www.universitiessa.ac.za', docs: 'ID, latest results, application fee (waivers available)',
-    verified: false, demo: true, lastChecked: 'July 2026'
-  },
-  {
-    type: 'TVET', title: 'TVET College Trimester Intake',
-    org: 'Public TVET Colleges', where: 'National',
-    closes: null, closesText: 'Intake dates vary by college',
-    link: 'https://www.dhet.gov.za', docs: 'ID and latest academic results',
-    verified: false, demo: true, lastChecked: 'July 2026'
-  }
-];
+export const OPPORTUNITIES: any[] = [];
 
 export const RESOURCES = [
   { title:'NSFAS Application Guide', cat:'NSFAS', audience:'Matric', year:2026,

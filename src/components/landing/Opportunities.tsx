@@ -1,5 +1,6 @@
 import { Reveal } from '../ui/Reveal';
 import { SHOW_UNVERIFIED, OPPORTUNITIES } from '../../data/landingData';
+import { Check } from 'lucide-react';
 
 export const Opportunities = () => {
   const visibleOpps = SHOW_UNVERIFIED ? OPPORTUNITIES : OPPORTUNITIES.filter(o => o.verified && !o.demo);
@@ -33,7 +34,9 @@ export const Opportunities = () => {
                     {o.demo ? (
                       <span className="text-xs uppercase font-bold tracking-wider bg-[#FBEEDF] text-[#C4651A] px-2.5 py-1 rounded-full">Verify before launch</span>
                     ) : o.verified ? (
-                      <span className="text-xs uppercase font-bold tracking-wider bg-[#E7F0EA] text-[#1E6B3C] px-2.5 py-1 rounded-full">✓ Verified</span>
+                      <span className="text-xs uppercase font-bold tracking-wider bg-[#E7F0EA] text-[#1E6B3C] px-2.5 py-1 rounded-full inline-flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Verified
+                      </span>
                     ) : null}
                   </div>
                   <h3 className="font-bold text-[#1A3A5C] text-lg leading-tight">{o.title}</h3>

@@ -24,42 +24,20 @@ interface Message {
   isMine: boolean;
 }
 
-const mockContacts: Contact[] = [
-  { id: "1", name: "Naledi Mokoena", role: "Mentor · CS", lastMessage: "Sure, let's schedule a session!", time: "2m ago", unread: 2, online: true },
-  { id: "2", name: "Thabo Ndlovu", role: "Mentor · Engineering", lastMessage: "Check out this resource 📎", time: "1h ago", unread: 0, online: true },
-  { id: "3", name: "Priya Naidoo", role: "Mentor · Life Sciences", lastMessage: "Good luck with your exam!", time: "3h ago", unread: 1, online: false },
-  { id: "4", name: "Arjun Pillay", role: "Tutor · Commerce", lastMessage: "I can help with that topic", time: "1d ago", unread: 0, online: false },
-  { id: "5", name: "Lerato Mthembu", role: "Society · Tech Hub", lastMessage: "Meeting on Friday at 4pm", time: "2d ago", unread: 0, online: false },
-];
+const initialContacts: Contact[] = [];
 
-const mockMessages: Record<string, Message[]> = {
-  "1": [
-    { id: "m1", senderId: "1", text: "Hi! I saw you're interested in web dev. I'd love to help! 🚀", time: "10:30 AM", isMine: false },
-    { id: "m2", senderId: "me", text: "That would be amazing! I'm struggling with React hooks.", time: "10:32 AM", isMine: true },
-    { id: "m3", senderId: "1", text: "No worries, hooks can be tricky at first. Want to do a session this week?", time: "10:33 AM", isMine: false },
-    { id: "m4", senderId: "me", text: "Yes please! When works for you?", time: "10:35 AM", isMine: true },
-    { id: "m5", senderId: "1", text: "Sure, let's schedule a session!", time: "10:36 AM", isMine: false },
-  ],
-  "2": [
-    { id: "m6", senderId: "2", text: "Hey, I found this great engineering resource", time: "9:00 AM", isMine: false },
-    { id: "m7", senderId: "2", text: "Check out this resource 📎", time: "9:01 AM", isMine: false },
-  ],
-  "3": [
-    { id: "m8", senderId: "me", text: "Thanks for the biology notes!", time: "Yesterday", isMine: true },
-    { id: "m9", senderId: "3", text: "Good luck with your exam!", time: "Yesterday", isMine: false },
-  ],
-};
+const initialMessages: Record<string, Message[]> = {};
 
 const Messages = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [newMessage, setNewMessage] = useState("");
-  const [conversations, setConversations] = useState(mockMessages);
+  const [conversations, setConversations] = useState(initialMessages);
 
-  const selected = mockContacts.find((c) => c.id === selectedId);
+  const selected = initialContacts.find((c) => c.id === selectedId);
   const messages = selectedId ? conversations[selectedId] || [] : [];
 
-  const filteredContacts = mockContacts.filter((c) =>
+  const filteredContacts = initialContacts.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -106,41 +84,48 @@ const Messages = () => {
 
         <ScrollArea className="flex-1">
           <div className="p-2">
-            {filteredContacts.map((contact) => (
-              <button
-                key={contact.id}
-                onClick={() => setSelectedId(contact.id)}
-                className={cn(
-                  "w-full flex items-center gap-3 p-3 rounded-xl text-left transition-colors",
-                  selectedId === contact.id
-                    ? "bg-primary/10"
-                    : "hover:bg-secondary"
-                )}
-              >
-                <div className="relative">
-                  <Avatar className="w-11 h-11">
-                    <AvatarFallback className="bg-secondary text-foreground font-display font-semibold text-sm">
-                      {initials(contact.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  {contact.online && (
-                    <Circle className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 fill-emerald-500 text-background stroke-[3]" />
+            {filteredContacts.length === 0 ? (
+              <div className="text-center py-12 px-4 text-muted-foreground text-sm">
+                <p className="font-semibold text-foreground mb-1">No conversations yet</p>
+                <p className="text-xs">Connect with a mentor or peer to start messaging.</p>
+              </div>
+            ) : (
+              filteredContacts.map((contact) => (
+                <button
+                  key={contact.id}
+                  onClick={() => setSelectedId(contact.id)}
+                  className={cn(
+                    "w-full flex items-center gap-3 p-3 rounded-xl text-left transition-colors",
+                    selectedId === contact.id
+                      ? "bg-primary/10"
+                      : "hover:bg-secondary"
                   )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-sm text-foreground truncate">{contact.name}</span>
-                    <span className="text-[10px] text-muted-foreground shrink-0">{contact.time}</span>
+                >
+                  <div className="relative">
+                    <Avatar className="w-11 h-11">
+                      <AvatarFallback className="bg-secondary text-foreground font-display font-semibold text-sm">
+                        {initials(contact.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    {contact.online && (
+                      <Circle className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 fill-emerald-500 text-background stroke-[3]" />
+                    )}
                   </div>
-                  <div className="text-xs text-muted-foreground truncate">{contact.lastMessage}</div>
-                </div>
-                {contact.unread > 0 && (
-                  <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shrink-0">
-                    {contact.unread}
-                  </span>
-                )}
-              </button>
-            ))}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-sm text-foreground truncate">{contact.name}</span>
+                      <span className="text-[10px] text-muted-foreground shrink-0">{contact.time}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground truncate">{contact.lastMessage}</div>
+                  </div>
+                  {contact.unread > 0 && (
+                    <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shrink-0">
+                      {contact.unread}
+                    </span>
+                  )}
+                </button>
+              ))
+            )}
           </div>
         </ScrollArea>
       </div>

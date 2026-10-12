@@ -2,47 +2,39 @@ import React from 'react';
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { DashboardProvider, useDashboard } from "@/contexts/DashboardContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut } from "lucide-react";
+import { Home, Users, GraduationCap, Target, User, LogOut } from "lucide-react";
 import { LOGO_SRC } from "@/data/landingData";
-import { Btn, Eyebrow } from "@/components/dashboard/ui/DashboardUI";
 
-const WalletModal = () => {
-  const { S, updateCoins, setModal, showToast } = useDashboard();
-  return (
-    <div>
-      <Eyebrow>PathwayCoin wallet</Eyebrow>
-      <div className="bg-gradient-to-br from-[#10263D] to-[#1A3A5C] text-white rounded-2xl text-center py-4 my-2">
-        <div className="text-[10.5px] tracking-[2px] font-bold text-[#B9CBDD]">BALANCE — PEGGED 1 PC = R1.00</div>
-        <div className="font-['Playfair_Display'] font-black text-4xl text-[#C9A84C] my-1">{S.coins} PC</div>
-        <div className="text-[10.5px] tracking-[2px] font-bold text-[#B9CBDD]">WITHDRAW TO ANY SA BANK · NO FEES</div>
-      </div>
-      <div className="flex gap-2 mb-4">
-        <Btn color="green" className="flex-1" onClick={() => { updateCoins(100, 'Wallet top-up'); }}>+ Add R100</Btn>
-        <Btn color="ghost" className="flex-1" onClick={() => { updateCoins(-S.coins, 'Withdrawn to bank'); setModal(null); showToast(`R${S.coins} on its way 🏦`); }}>Withdraw</Btn>
-      </div>
-      <Eyebrow>Transactions</Eyebrow>
-      <div className="bg-white border rounded-2xl p-4 mt-2 max-h-[40vh] overflow-y-auto">
-        {S.tx.slice(0, 8).map((t, i) => (
-          <div key={i} className="flex justify-between py-2 border-b last:border-0 text-[13px]">
-            <span>{t.t}</span>
-            <b className={t.v >= 0 ? 'text-[#1E6B3C]' : 'text-[#C0392B]'}>{t.v > 0 ? '+' : ''}{t.v} PC</b>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const NavBtnMobile = ({ active, icon, label, onClick }: { active: boolean, icon: string, label: string, onClick: () => void }) => (
-  <button onClick={onClick} className={`flex-1 flex flex-col items-center gap-1 py-1.5 text-[9px] font-bold tracking-wide ${active ? 'text-[#1A3A5C]' : 'text-[#94A0B2]'}`}>
-    <span className={`text-xl transition-transform ${active ? '-translate-y-0.5' : 'opacity-55'}`}>{icon}</span>
+const NavBtnMobile = ({ active, icon: Icon, label, onClick }: { 
+  active: boolean; 
+  icon: React.ComponentType<{ className?: string }>; 
+  label: string; 
+  onClick: () => void;
+}) => (
+  <button onClick={onClick} className={`flex-1 flex flex-col items-center gap-1 py-1.5 text-[9px] font-bold tracking-wide transition-colors ${active ? 'text-[#1A3A5C]' : 'text-[#94A0B2]'}`}>
+    <Icon className={`w-5 h-5 transition-transform ${active ? '-translate-y-0.5 text-[#1A3A5C]' : 'opacity-65'}`} />
     {label}
   </button>
 );
 
+const sidebarNavItems = [
+  { id: 'home', icon: Home, label: 'Home' },
+  { id: 'connect', icon: Users, label: 'Connect' },
+  { id: 'study', icon: GraduationCap, label: 'Study' },
+  { id: 'opps', icon: Target, label: 'Opps' },
+];
+
+const mobileNavItems = [
+  { id: 'home', icon: Home, label: 'Home' },
+  { id: 'connect', icon: Users, label: 'Connect' },
+  { id: 'study', icon: GraduationCap, label: 'Study' },
+  { id: 'opps', icon: Target, label: 'Opps' },
+  { id: 'profile', icon: User, label: 'Profile' },
+];
+
 const DashboardShell = () => {
   const { S, modal, setModal, toast } = useDashboard();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -55,18 +47,8 @@ const DashboardShell = () => {
     }
   };
 
-  const currentScreen = location.pathname.split('/').pop() || 'pulse';
-  const isPulse = location.pathname === '/app' || location.pathname === '/app/';
-
-  const navItems = {
-    Learner: [['pulse', '🏠', 'Pulse'], ['connect', '🤝', 'Connect'], ['study', '📚', 'Study'], ['profile', '👤', 'Profile'], ['opps', '🎯', 'Opps'], ['more', '✦', 'More']],
-    'Student Mentor': [['pulse', '🏠', 'Home'], ['connect', '🤝', 'Matches'], ['study', '📚', 'Study'], ['profile', '👤', 'Profile'], ['more', '✦', 'More']],
-    'Graduate Tutor': [['pulse', '🏠', 'Home'], ['profile', '👤', 'Profile'], ['more', '🛒', 'Bazaar']],
-    Donor: [['pulse', '🏠', 'Home'], ['opps', '💛', 'Fund'], ['profile', '👤', 'Profile'], ['more', '✦', 'More']],
-    Parent: [['pulse', '🏠', 'Child'], ['study', '📚', 'Study'], ['profile', '👤', 'Profile'], ['more', '✦', 'More']],
-  };
-
-  const currentNav = navItems[S.role as keyof typeof navItems] || navItems.Learner;
+  const currentScreen = location.pathname.split('/').pop() || 'home';
+  const isHome = location.pathname === '/app' || location.pathname === '/app/' || location.pathname === '/app/home' || currentScreen === 'app' || currentScreen === 'home';
 
   return (
     <div className="h-[100dvh] w-full bg-[#F5F0E8] text-[#10263D] flex flex-col md:flex-row font-['Inter',sans-serif] overflow-hidden">
@@ -82,37 +64,52 @@ const DashboardShell = () => {
             </div>
           </div>
           
-          <div className="p-4 border-b border-white/10 shrink-0">
-            <button onClick={() => setModal({ title: 'Wallet', content: <WalletModal /> })} className="w-full bg-white/10 border border-[#C9A84C]/55 rounded-xl py-2.5 px-3 text-sm font-bold text-[#F3E4B8] flex items-center justify-center gap-2 hover:bg-white/20 transition-colors shadow-sm">
-              <span className="w-3 h-3 rounded-full bg-gradient-to-br from-[#F0DCA0] to-[#A8862F]"></span>
-              {S.coins} PC Wallet
-            </button>
-          </div>
-          
           <nav className="flex-1 overflow-y-auto p-4 space-y-2">
-            {currentNav.map(([s, ic, lb]) => {
-              const active = currentScreen === s || (isPulse && s === 'pulse');
+            {sidebarNavItems.map(({ id, icon: Icon, label }) => {
+              const active = (currentScreen === id && !isHome) || (isHome && id === 'home');
               return (
                 <button 
-                  key={s} 
-                  onClick={() => navigate(s === 'pulse' ? '/app' : `/app/${s}`)} 
+                  key={id} 
+                  onClick={() => navigate(id === 'home' ? '/app' : `/app/${id}`)} 
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold tracking-wide transition-colors ${active ? 'bg-gradient-to-br from-[#D9BC6B] to-[#C9A84C] text-[#10263D] shadow-md' : 'text-[#B9CBDD] hover:bg-white/10 hover:text-white'}`}
                 >
-                  <span className="text-xl w-6 text-center">{ic}</span>
-                  {lb}
+                  <Icon className="w-5 h-5 shrink-0" />
+                  <span>{label}</span>
                 </button>
               );
             })}
           </nav>
           
-          <div className="p-4 border-t border-white/10 shrink-0 bg-black/10 flex justify-between items-center">
-            <div className="min-w-0">
-              <div className="font-bold text-sm truncate">{S.name}</div>
-              <div className="text-xs text-[#8FA5BB] mt-0.5 truncate">{S.role}</div>
-            </div>
+          {/* Bottom-left user profile button */}
+          <div className="p-3 border-t border-white/10 shrink-0 bg-black/15 flex items-center justify-between gap-2">
+            <button 
+              onClick={() => navigate('/app/profile')} 
+              className={`flex-1 flex items-center gap-3 p-2 rounded-xl text-left transition-all group ${
+                currentScreen === 'profile'
+                  ? 'bg-gradient-to-br from-[#D9BC6B] to-[#C9A84C] text-[#10263D] shadow-md'
+                  : 'hover:bg-white/10 text-white'
+              }`}
+              title="My Profile"
+            >
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0 transition-transform group-hover:scale-105 ${
+                currentScreen === 'profile'
+                  ? 'bg-[#10263D] text-[#C9A84C]'
+                  : 'bg-white/15 text-[#C9A84C] border border-white/20'
+              }`}>
+                {user?.name ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) : <User className="w-4 h-4" />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className={`font-bold text-sm truncate ${currentScreen === 'profile' ? 'text-[#10263D]' : 'text-white'}`}>
+                  {S.name || user?.name || 'Learner'}
+                </div>
+                <div className={`text-[11px] truncate font-semibold ${currentScreen === 'profile' ? 'text-[#10263D]/80' : 'text-[#8FA5BB]'}`}>
+                  Learner · Profile
+                </div>
+              </div>
+            </button>
             <button 
               onClick={handleLogout} 
-              className="text-[#8FA5BB] hover:text-white transition-colors ml-3 p-1.5 rounded-lg hover:bg-white/10 shrink-0" 
+              className="text-[#8FA5BB] hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10 shrink-0" 
               title="Logout"
             >
               <LogOut className="w-5 h-5" />
@@ -126,42 +123,44 @@ const DashboardShell = () => {
         
         {/* Mobile Top Bar */}
         {currentScreen !== 'onboard' && (
-          <div className="md:hidden bg-gradient-to-br from-[#10263D] to-[#1A3A5C] text-white p-3 flex items-center gap-2 shrink-0 z-30 shadow-md">
-            <img src={LOGO_SRC} alt="Logo" className="w-8 h-auto" />
-            <div className="flex-1 min-w-0">
-              <b className="font-['Playfair_Display'] font-bold text-base tracking-wide text-white truncate block">JER<span className="text-[#C9A84C]">NUA</span>MBO</b>
-              <small className="block text-[8px] tracking-[3px] text-[#C9A84C] font-bold">— PATHWAYS —</small>
+          <div className="md:hidden bg-gradient-to-br from-[#10263D] to-[#1A3A5C] text-white p-3 flex items-center justify-between shrink-0 z-30 shadow-md">
+            <div className="flex items-center gap-2 min-w-0">
+              <img src={LOGO_SRC} alt="Logo" className="w-8 h-auto" />
+              <div className="min-w-0">
+                <b className="font-['Playfair_Display'] font-bold text-base tracking-wide text-white truncate block">JER<span className="text-[#C9A84C]">NUA</span>MBO</b>
+                <small className="block text-[8px] tracking-[3px] text-[#C9A84C] font-bold">— PATHWAYS —</small>
+              </div>
             </div>
             <button 
               onClick={handleLogout} 
-              className="text-[#8FA5BB] hover:text-white transition-colors p-1"
+              className="text-[#8FA5BB] hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10"
+              title="Logout"
             >
               <LogOut className="w-5 h-5" />
-            </button>
-            <button onClick={() => setModal({ title: 'Wallet', content: <WalletModal /> })} className="bg-white/10 border border-[#C9A84C]/55 rounded-full py-1.5 px-3 text-xs font-bold text-[#F3E4B8] flex items-center gap-1.5 ml-1">
-              <span className="w-3 h-3 rounded-full bg-gradient-to-br from-[#F0DCA0] to-[#A8862F]"></span>
-              {S.coins} PC
             </button>
           </div>
         )}
 
         {/* Content Area (Scrollable) */}
-        <main className="flex-1 w-full max-w-4xl mx-auto overflow-y-auto relative md:p-6">
+        <main className="flex-1 w-full max-w-4xl mx-auto overflow-y-auto no-scrollbar relative md:p-6">
           <Outlet />
         </main>
 
         {/* Mobile Bottom Nav */}
         {currentScreen !== 'onboard' && (
           <div className="md:hidden bg-white border-t border-[#E4E0D4] flex p-1.5 pb-safe z-40 shrink-0 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-            {currentNav.map(([s, ic, lb]) => (
-              <NavBtnMobile 
-                key={s} 
-                active={currentScreen === s || (isPulse && s === 'pulse')} 
-                icon={ic} 
-                label={lb} 
-                onClick={() => navigate(s === 'pulse' ? '/app' : `/app/${s}`)} 
-              />
-            ))}
+            {mobileNavItems.map(({ id, icon: Icon, label }) => {
+              const active = (currentScreen === id && !isHome) || (isHome && id === 'home');
+              return (
+                <NavBtnMobile 
+                  key={id} 
+                  active={active} 
+                  icon={Icon} 
+                  label={label} 
+                  onClick={() => navigate(id === 'home' ? '/app' : `/app/${id}`)} 
+                />
+              );
+            })}
           </div>
         )}
       </div>

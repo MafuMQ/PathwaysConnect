@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboard } from '@/contexts/DashboardContext';
-import { OPPS, UNIS, evalOpp, calcAPS, LVL } from '@/data/dashboardData';
-import { Card, Eyebrow, Title, Sub, Pill, Btn } from '@/components/dashboard/ui/DashboardUI';
-import { X } from 'lucide-react';
+import { UNIS, calcAPS, LVL } from '@/data/dashboardData';
+import { Card, Eyebrow, Title, Sub, Btn } from '@/components/dashboard/ui/DashboardUI';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreVertical, Upload, Trash2, X, Plus, Zap, Check } from 'lucide-react';
 
 const VALID_SUBJECTS = [
   'Mathematics', 'Mathematical Literacy', 'English HL', 'English FAL', 
@@ -14,153 +20,298 @@ const VALID_SUBJECTS = [
   'Computer Applications Technology'
 ];
 
-const COURSES = [
-  { ic: "🚀", n: "Grade 10 IEB", type: "Progression", req: "Pass Grade 9 with 50% avg", aps: "N/A" },
-  { ic: "🌍", n: "Cambridge IGCSE", type: "Curriculum Shift", req: "Strong Math & English (60%+)", aps: "N/A" },
-  { ic: "🛠️", n: "TVET NCV Level 2", type: "Vocational", req: "Grade 9 pass", aps: "N/A" }
+const STUDY_TABS = [
+  { id: 'academic', label: 'Academic Info' },
+  { id: 'vault', label: 'Academic Vault' },
+  { id: 'aps', label: 'APS Calculator' },
 ];
 
 const Study = () => {
-  const { user } = useAuth();
-  const { S, updateMark, deleteMark, showToast } = useDashboard();
+  const { user, updateProfile } = useAuth();
+  const { S, updateMark, deleteMark, uploadDoc, deleteDoc, showToast } = useDashboard();
   const navigate = useNavigate();
   const location = useLocation();
-  const [studyTab, setStudyTab] = useState(location.state?.tab || 'dash');
+  const [studyTab, setStudyTab] = useState(location.state?.tab || 'academic');
   const [newSubject, setNewSubject] = useState("");
 
+  const [editingAcademic, setEditingAcademic] = useState(false);
+  const [academicForm, setAcademicForm] = useState({
+    institution: user?.institution || "",
+    grade: user?.grade || "",
+    curriculum: user?.curriculum || "",
+  });
+
+  useEffect(() => {
+    if (user) {
+      setAcademicForm({
+        institution: user.institution || "",
+        grade: user.grade || "",
+        curriculum: user.curriculum || "",
+      });
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (location.state?.tab) {
+      setStudyTab(location.state.tab);
+    }
+  }, [location.state?.tab]);
+
+  const handleSaveAcademic = async () => {
+    try {
+      await updateProfile(academicForm);
+      setEditingAcademic(false);
+      showToast("Academic info updated");
+    } catch (e) {
+      console.error(e);
+      showToast("Failed to update academic info");
+    }
+  };
+
   const aps = calcAPS(S.marks);
-  const evald = OPPS.map(o => ({ o, e: evalOpp(o, S.marks, S.career, S.docs) })).sort((a, b) => b.e.score - a.e.score);
-  const top = evald[0];
 
   return (
     <div className="p-4 pb-24">
-      <Eyebrow>Studyroom X™ · Learning Operating System</Eyebrow>
-      <Title>Learn smarter. Unlock your future.</Title>
+      <Eyebrow>Study & Academic Hub</Eyebrow>
+      <Title>Academic Records & Intelligence</Title>
       
-      <div className="flex gap-1.5 my-3 overflow-x-auto pb-1">
-        {['dash', 'courses', 'subjects', 'ai', 'twin', 'aps'].map(t => (
-          <button key={t} onClick={() => setStudyTab(t)} className={`shrink-0 border rounded-full py-1.5 px-3.5 text-[11.5px] font-bold tracking-wide ${studyTab === t ? 'bg-[#1A3A5C] text-white border-[#1A3A5C]' : 'bg-white border-[#E4E0D4] text-[#6B7688]'}`}>
-            {t === 'aps' ? 'APS Calculator' : t.charAt(0).toUpperCase() + t.slice(1)}
+      <div className="flex gap-1.5 my-3 overflow-x-auto no-scrollbar pb-1">
+        {STUDY_TABS.map(t => (
+          <button 
+            key={t.id} 
+            onClick={() => setStudyTab(t.id)} 
+            className={`shrink-0 border rounded-full py-1.5 px-3.5 text-[11.5px] font-bold tracking-wide transition-colors ${
+              studyTab === t.id 
+                ? 'bg-[#1A3A5C] text-white border-[#1A3A5C]' 
+                : 'bg-white border-[#E4E0D4] text-[#6B7688] hover:border-[#1A3A5C]/40'
+            }`}
+          >
+            {t.label}
           </button>
         ))}
       </div>
 
-      {studyTab === 'dash' && (
-        <>
-          <Card className="bg-gradient-to-br from-[#10263D] to-[#1A3A5C] text-white border-[#C9A84C]/45">
-            <Eyebrow className="text-[#C9A84C]">🤖 AI Study Concierge™</Eyebrow>
-            <p className="font-['Playfair_Display'] text-base font-bold my-2">Good morning, {S.name} 👋<br/><span className="text-[13px] font-semibold text-[#C8D6E5]">Maths P1 is in <b className="text-[#C9A84C]">18 days</b>.</span></p>
-            <div className="grid grid-cols-4 gap-2">
-              <div className="bg-white/10 border border-[#C9A84C]/40 rounded-xl p-2 text-center"><div className="font-bold text-lg">{S.streak}🔥</div><div className="text-[9.5px] text-[#B9CBDD] uppercase font-bold">Streak</div></div>
-              <div className="bg-white/10 border border-[#C9A84C]/40 rounded-xl p-2 text-center"><div className="font-bold text-lg">{aps}</div><div className="text-[9.5px] text-[#B9CBDD] uppercase font-bold">APS now</div></div>
-              <div className="bg-white/10 border border-[#C9A84C]/40 rounded-xl p-2 text-center"><div className="font-bold text-lg text-[#7BD89B]">{aps + 2}</div><div className="text-[9.5px] text-[#B9CBDD] uppercase font-bold">Predicted</div></div>
-              <div className="bg-white/10 border border-[#C9A84C]/40 rounded-xl p-2 text-center"><div className="font-bold text-lg">★★★</div><div className="text-[9.5px] text-[#B9CBDD] uppercase font-bold">Uni chances</div></div>
-            </div>
-          </Card>
-          <Card className="cursor-pointer" onClick={() => navigate('/app/opps')}>
-            <div className="flex items-center gap-3">
-              <div className="text-2xl">🎯</div>
-              <div className="flex-1"><b className="font-['Inter'] text-[13px] text-[#1A3A5C]">Today's opportunity: {top.o.n}</b><div className="text-xs text-[#6B7688]">{top.e.score}/100 match · closes in {top.o.dl} days</div></div>
-              <span>›</span>
-            </div>
-          </Card>
-          <Card className="bg-[#F6EFD9] border-[#C9A84C]">
-            <Eyebrow>⛓️ Why today matters — live projection</Eyebrow>
-            <div className="mt-2 text-[13px] leading-relaxed">
-              <div className="flex gap-2"><span className="text-[#C9A84C] font-bold">●</span> Complete today's <b>Mathematics</b> lesson & practice</div>
-              <div className="flex gap-2"><span className="text-[#C9A84C] font-bold">●</span> Maths climbs <b>65% → 68%</b></div>
-              <div className="flex gap-2"><span className="text-[#C9A84C] font-bold">●</span> APS becomes <b>{aps} → {aps + 1}</b> ▲</div>
-              <div className="flex gap-2"><span className="text-[#C9A84C] font-bold">●</span> 🔓 Unlocks: <b>UJ BNurs</b></div>
-            </div>
-            <Btn size="sm" color="navy" block className="mt-3">Start Maths now →</Btn>
-          </Card>
-        </>
-      )}
-
-      {studyTab === 'courses' && (
-        <div className="animate-in fade-in">
-          <Eyebrow>Current Course Profile</Eyebrow>
-          <Card className="mb-4 bg-gradient-to-br from-[#10263D] to-[#1A3A5C] text-white border-[#C9A84C]/45">
-            <div className="flex items-center gap-3">
-              <div className="text-4xl">🎓</div>
+      {studyTab === 'academic' && (
+        <div className="animate-in fade-in space-y-4">
+          <Card>
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <div className="text-[10px] text-[#B9CBDD] uppercase font-bold tracking-wider mb-1">ENROLLED</div>
-                <div className="font-['Playfair_Display'] text-xl font-bold text-[#C9A84C]">
-                  {user?.curriculum || 'Curriculum not set'} · {user?.grade || 'Grade not set'}
-                </div>
-                <div className="text-xs mt-1 text-[#C8D6E5]">You are on track for progression.</div>
+                <Eyebrow>Institutional Profile</Eyebrow>
+                <Title>Academic Info</Title>
               </div>
+              <Btn 
+                size="sm" 
+                color={editingAcademic ? 'ghost' : 'navy'} 
+                onClick={() => {
+                  if (editingAcademic) {
+                    setAcademicForm({
+                      institution: user?.institution || "",
+                      grade: user?.grade || "",
+                      curriculum: user?.curriculum || ""
+                    });
+                  }
+                  setEditingAcademic(!editingAcademic);
+                }}
+              >
+                {editingAcademic ? 'Cancel' : 'Edit Info'}
+              </Btn>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <Eyebrow>Institution / School</Eyebrow>
+                {editingAcademic ? (
+                  <input 
+                    className="w-full p-2.5 border border-[#E4E0D4] rounded-xl text-sm font-semibold outline-none focus:border-[#C9A84C] bg-white" 
+                    value={academicForm.institution} 
+                    onChange={e => setAcademicForm({...academicForm, institution: e.target.value})} 
+                    placeholder="e.g. Pretoria Boys High / North-West TVET" 
+                  />
+                ) : (
+                  <p className="text-[14px] font-bold text-[#1A3A5C]">{user?.institution || 'Not set'}</p>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <Eyebrow>Current Grade / Level</Eyebrow>
+                  {editingAcademic ? (
+                    <select 
+                      className="w-full p-2.5 border border-[#E4E0D4] rounded-xl text-sm font-semibold outline-none focus:border-[#C9A84C] bg-white" 
+                      value={academicForm.grade} 
+                      onChange={e => setAcademicForm({...academicForm, grade: e.target.value})}
+                    >
+                      <option value="">Select Grade</option>
+                      <option value="Grade 10">Grade 10</option>
+                      <option value="Grade 11">Grade 11</option>
+                      <option value="Grade 12">Grade 12</option>
+                      <option value="Graduate">Graduate</option>
+                    </select>
+                  ) : (
+                    <p className="text-[14px] font-bold text-[#1A3A5C]">{user?.grade || 'Not set'}</p>
+                  )}
+                </div>
+                <div>
+                  <Eyebrow>Curriculum</Eyebrow>
+                  {editingAcademic ? (
+                    <select 
+                      className="w-full p-2.5 border border-[#E4E0D4] rounded-xl text-sm font-semibold outline-none focus:border-[#C9A84C] bg-white" 
+                      value={academicForm.curriculum} 
+                      onChange={e => setAcademicForm({...academicForm, curriculum: e.target.value})}
+                    >
+                      <option value="">Select Curriculum</option>
+                      <option value="CAPS">CAPS</option>
+                      <option value="IEB">IEB</option>
+                      <option value="Cambridge">Cambridge</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  ) : (
+                    <p className="text-[14px] font-bold text-[#1A3A5C]">{user?.curriculum || 'Not set'}</p>
+                  )}
+                </div>
+              </div>
+
+              {editingAcademic && (
+                <div className="pt-3 border-t border-[#E4E0D4] flex justify-end">
+                  <Btn color="gold" onClick={handleSaveAcademic}>Save Changes</Btn>
+                </div>
+              )}
             </div>
           </Card>
 
-          <Eyebrow>Qualifying Next-Step Pathways</Eyebrow>
-          <Sub className="mb-3">Courses and curriculums you qualify for based on your current academic profile.</Sub>
-          {COURSES.map((c, i) => (
-            <Card key={i} className="mb-2">
-              <div className="flex items-center gap-3">
-                <div className="text-3xl">{c.ic}</div>
-                <div className="flex-1">
-                  <b className="font-['Playfair_Display'] text-[15.5px] text-[#1A3A5C]">{c.n}</b>
-                  <div className="text-xs text-[#6B7688]">Path: {c.type}</div>
+          <Card>
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <Eyebrow>Subject Enrollment</Eyebrow>
+                <Title>My Registered Subjects</Title>
+              </div>
+              <Btn size="sm" color="ghost" onClick={() => setStudyTab('aps')}>
+                Manage Marks in APS Calculator →
+              </Btn>
+            </div>
+            <Sub className="mb-3">
+              Add your registered subjects below. You can update your numerical percentage marks in the APS Calculator tab.
+            </Sub>
+
+            <div className="flex flex-wrap gap-2 mb-4">
+              {Object.keys(S.marks).length > 0 ? (
+                Object.keys(S.marks).map(s => (
+                  <div key={s} className="bg-[#E7F2EA] text-[#1E6B3C] border border-[#C6E0CE] rounded-full px-3 py-1.5 text-xs font-bold flex items-center gap-2 shadow-xs">
+                    <span>{s}</span>
+                    <span className="text-[10px] bg-white/70 px-1.5 py-0.5 rounded-full text-[#1E6B3C]">{S.marks[s]}%</span>
+                    <button 
+                      onClick={() => deleteMark(s)} 
+                      className="hover:text-red-600 transition-colors ml-0.5" 
+                      title="Remove subject"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-[#6B7688] italic py-2">No subjects registered yet. Search and add your subjects below.</div>
+              )}
+            </div>
+
+            <div className="relative">
+              <input 
+                value={newSubject}
+                onChange={e => setNewSubject(e.target.value)}
+                placeholder="Search and add a subject (e.g. Mathematics, Physical Sciences)..."
+                className="w-full border border-[#E4E0D4] rounded-xl p-3 text-sm font-semibold text-[#1A3A5C] outline-none focus:border-[#C9A84C] bg-[#F9F9F8]"
+              />
+              {newSubject && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-[#E4E0D4] rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                  {VALID_SUBJECTS.filter(s => s.toLowerCase().includes(newSubject.toLowerCase()) && S.marks[s] === undefined).length > 0 ? (
+                    VALID_SUBJECTS.filter(s => s.toLowerCase().includes(newSubject.toLowerCase()) && S.marks[s] === undefined).map(sub => (
+                      <div 
+                        key={sub}
+                        className="p-2.5 text-sm text-[#1A3A5C] font-semibold hover:bg-[#F6EFD9] cursor-pointer border-b last:border-0 border-[#E4E0D4] flex items-center justify-between"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          updateMark(sub, 0);
+                          setNewSubject("");
+                          showToast(`Added ${sub} to subjects`);
+                        }}
+                      >
+                        <span>{sub}</span>
+                        <Plus className="w-4 h-4 text-[#8FA5BB]" />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-3 text-xs text-[#6B7688] italic">No matching subjects found.</div>
+                  )}
                 </div>
-                <Pill color={c.type === 'Vocational' ? 'amber' : 'navy'}>{c.type === 'Progression' ? 'Direct' : 'Shift'}</Pill>
-              </div>
-              <div className="text-[12.5px] leading-relaxed mt-2 pt-2 border-t border-[#E4E0D4]">
-                📝 <b>Requirements:</b> {c.req}<br />
-                📊 <b>APS Impact:</b> {c.aps}
-              </div>
-            </Card>
-          ))}
+              )}
+            </div>
+          </Card>
         </div>
       )}
 
-      {studyTab === 'subjects' && (
-        <>
-          <input className="w-full p-3 border border-[#E4E0D4] rounded-xl mb-3 outline-none" placeholder="🔍 Search all CAPS subjects…" />
-          <div className="grid grid-cols-2 gap-2">
-            {['Mathematics', 'Physical Sciences', 'Life Sciences', 'English HL', 'Accounting', 'Geography'].map(s => (
-              <div key={s} className="bg-white border border-[#E4E0D4] rounded-2xl p-3">
-                <div className="flex justify-between items-center mb-1"><span className="text-xl">📐</span><Pill color="gold">SILVER</Pill></div>
-                <b className="font-['Inter'] text-[12.5px] text-[#1A3A5C] block">{s}</b>
-                <span className="text-xs text-[#6B7688]">Avg {S.marks[s] || 60}% → pred 70%</span>
-                <div className="h-1 bg-[#EDEAE0] rounded-full mt-2"><div className="h-full w-[60%] bg-gradient-to-r from-[#C9A84C] to-[#1E6B3C] rounded-full"></div></div>
+      {studyTab === 'vault' && (
+        <div className="animate-in fade-in space-y-4">
+          <Card className="bg-[#F6EFD9] border-[#C9A84C]">
+            <Eyebrow className="flex items-center gap-1.5 text-[#A8862F]">
+              <Zap className="w-3.5 h-3.5" /> Academic Insights & Intelligence
+            </Eyebrow>
+            <p className="font-['Inter'] font-bold text-sm text-[#1A3A5C] my-2">
+              {S.docs.some(d => d.n.includes('Grade 11') && d.ok) 
+                ? 'Your Grade 11 report is uploaded. The intelligence layer is ready.' 
+                : 'Upload your academic reports below to calculate your APS and unlock verified pathways.'}
+            </p>
+            <Btn color="navy" block onClick={() => setStudyTab('aps')}>
+              Calculate my APS & view university options →
+            </Btn>
+          </Card>
+
+          <Card>
+            <div className="flex justify-between items-center mb-3">
+              <div>
+                <Eyebrow>Encrypted Document Storage</Eyebrow>
+                <Title>Academic Vault</Title>
               </div>
-            ))}
-          </div>
-        </>
-      )}
-
-
-
-      {studyTab === 'ai' && (
-        <Card>
-          <Eyebrow>AI Personal Tutor</Eyebrow>
-          <Sub className="mb-3">Not a chatbot — a CAPS tutor.</Sub>
-          <div className="space-y-2 mb-4">
-            <div className="bg-[#1A3A5C] text-white p-3 rounded-2xl rounded-br-sm max-w-[80%] self-end ml-auto">Explain photosynthesis like I'm 15</div>
-            <div className="bg-white border p-3 rounded-2xl rounded-bl-sm max-w-[80%]">🌱 Photosynthesis is a plant's solar-powered kitchen. It takes sunlight, water, and CO₂ to make glucose (food). Oxygen is the leftover. Formula: 6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂. Exam tip: examiners love asking WHERE it happens (chloroplast).</div>
-          </div>
-          <div className="flex gap-2">
-            <input className="flex-1 p-3 border rounded-full outline-none" placeholder="Ask your tutor anything…" />
-            <Btn size="sm" color="navy">Ask</Btn>
-          </div>
-        </Card>
-      )}
-
-
-
-      {studyTab === 'twin' && (
-        <Card>
-          <Eyebrow>Life Digital Twin™</Eyebrow>
-          <Sub className="mb-3">A living academic model of {S.name}.</Sub>
-          <div className="bg-gradient-to-br from-[#10263D] to-[#1A3A5C] text-white rounded-xl p-4">
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div><div className="font-bold text-lg">{aps}</div><div className="text-[10px] text-[#B9CBDD] uppercase">APS today</div></div>
-              <div><div className="font-bold text-lg text-[#7BD89B]">{aps + 2}</div><div className="text-[10px] text-[#B9CBDD] uppercase">Trajectory</div></div>
-              <div><div className="font-bold text-lg">—</div><div className="text-[10px] text-[#B9CBDD] uppercase">Accuracy</div></div>
+              <Btn size="sm" color="ghost" onClick={() => showToast('All files exported as ZIP')}>
+                Export all
+              </Btn>
             </div>
-          </div>
-        </Card>
+            <Sub className="mb-3">
+              Upload verified copies of your academic and identity records for one-click admissions and bursary applications.
+            </Sub>
+
+            <div className="divide-y divide-[#E4E0D4]">
+              {S.docs.map((d, i) => (
+                <div key={i} className="flex items-center gap-3 py-3 group">
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${d.ok ? 'bg-[#E7F2EA] text-[#1E6B3C]' : 'bg-[#F1EFE7] text-[#B9B29C] border border-dashed border-[#CFC8B2]'}`}>
+                    {d.ok ? <Check className="w-3.5 h-3.5 text-[#1E6B3C]" /> : <span className="w-1.5 h-1.5 rounded-full bg-[#B9B29C]" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <b className="text-[13.5px] text-[#1A3A5C] truncate block">{d.n}</b>
+                    <div className="text-xs text-[#6B7688] truncate">{d.d}</div>
+                  </div>
+                  {!d.ok ? (
+                    <Btn size="sm" color="ghost" onClick={() => uploadDoc(i)}>Upload</Btn>
+                  ) : (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-black/5 text-[#8FA5BB] transition-colors shrink-0">
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40 font-['Inter']">
+                        <DropdownMenuItem onClick={() => uploadDoc(i)} className="cursor-pointer text-[13px]">
+                          <Upload className="w-3.5 h-3.5 mr-2 text-[#10263D]" /> Overwrite
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => deleteDoc(i)} className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 text-[13px]">
+                          <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
       )}
 
       {studyTab === 'aps' && (
@@ -174,37 +325,43 @@ const Study = () => {
             <Btn size="sm" color="ghost" onClick={() => showToast('Coming soon: Extract subjects from uploaded report!')}>Analyse / Extract Report</Btn>
           </div>
           
-          <table className="w-full text-sm mb-4">
-            <thead>
-              <tr className="text-[10px] text-[#6B7688] uppercase border-b">
-                <th className="text-left py-2">Subject</th>
-                <th>%</th>
-                <th>Level</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(S.marks).map(([s, p]) => (
-                <tr key={s} className="border-b">
-                  <td className="py-3 font-bold text-[#1A3A5C]">{s}</td>
-                  <td className="text-center">
-                    <input 
-                      type="number" 
-                      value={p as number} 
-                      onChange={e => updateMark(s, Math.min(100, Math.max(0, +e.target.value || 0)))}
-                      className="w-14 p-1 border rounded-md text-center font-bold text-[#1A3A5C]"
-                    />
-                  </td>
-                  <td className="text-center font-bold text-[#6B7688]">LVL {LVL(p as number)}</td>
-                  <td className="text-right">
-                    <button onClick={() => deleteMark(s)} className="text-[#C0392B] p-1.5 hover:bg-red-50 rounded-lg transition-colors" title="Remove subject">
-                      <X className="w-4 h-4" />
-                    </button>
-                  </td>
+          {Object.keys(S.marks).length === 0 ? (
+            <div className="text-center py-6 text-xs text-[#6B7688] italic border-b mb-4">
+              No subjects added yet. Search and select a subject below to enter your marks.
+            </div>
+          ) : (
+            <table className="w-full text-sm mb-4">
+              <thead>
+                <tr className="text-[10px] text-[#6B7688] uppercase border-b">
+                  <th className="text-left py-2">Subject</th>
+                  <th>%</th>
+                  <th>Level</th>
+                  <th></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {Object.entries(S.marks).map(([s, p]) => (
+                  <tr key={s} className="border-b">
+                    <td className="py-3 font-bold text-[#1A3A5C]">{s}</td>
+                    <td className="text-center">
+                      <input 
+                        type="number" 
+                        value={p as number} 
+                        onChange={e => updateMark(s, Math.min(100, Math.max(0, +e.target.value || 0)))}
+                        className="w-14 p-1 border rounded-md text-center font-bold text-[#1A3A5C]"
+                      />
+                    </td>
+                    <td className="text-center font-bold text-[#6B7688]">LVL {LVL(p as number)}</td>
+                    <td className="text-right">
+                      <button onClick={() => deleteMark(s)} className="text-[#C0392B] p-1.5 hover:bg-red-50 rounded-lg transition-colors" title="Remove subject">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
 
           <div className="mt-2 mb-6 p-3 bg-[#F9F9F8] rounded-xl border border-[#E4E0D4]">
             <div className="relative">
@@ -241,18 +398,26 @@ const Study = () => {
           <div className="bg-gradient-to-br from-[#10263D] to-[#1A3A5C] text-white rounded-2xl p-4 text-center">
             <div className="text-[10.5px] tracking-[2px] font-bold text-[#B9CBDD]">YOUR APS SCORE</div>
             <div className="font-['Playfair_Display'] font-black text-4xl text-[#C9A84C] my-1">{aps}</div>
-            <div className="text-[10.5px] tracking-[2px] font-bold text-[#B9CBDD]">{aps >= 32 ? 'STRONG — UNIVERSITY RANGE' : aps >= 26 ? 'SOLID — MULTIPLE PATHWAYS' : 'BUILDING — TVET ROUTES OPEN'}</div>
+            <div className="text-[10.5px] tracking-[2px] font-bold text-[#B9CBDD]">
+              {aps >= 32 ? 'STRONG — UNIVERSITY RANGE' : aps >= 26 ? 'SOLID — MULTIPLE PATHWAYS' : aps > 0 ? 'BUILDING — TVET ROUTES OPEN' : 'ENTER MARKS TO CALCULATE APS'}
+            </div>
           </div>
 
           <div className="mt-6">
-            <Eyebrow>Your university options · Career: {S.career}</Eyebrow>
-            {UNIS.filter(u => u.cat === 'uni' && aps >= u.min).map(u => (
-              <div key={u.n} className="border border-[#E4E0D4] rounded-xl p-3 mb-2 bg-white">
-                <b className="font-['Playfair_Display']">{u.n}</b>
-                <div className="text-xs text-[#6B7688] mt-1">{u.course} · APS {u.min}–{u.max} · Apply by {u.deadline}</div>
-                <Btn size="sm" color="green" className="mt-2" onClick={() => showToast('Application started 📌')}>Apply now</Btn>
+            <Eyebrow>Your university options {S.career ? `· Career: ${S.career}` : ''}</Eyebrow>
+            {UNIS.filter(u => u.cat === 'uni' && aps >= u.min).length > 0 ? (
+              UNIS.filter(u => u.cat === 'uni' && aps >= u.min).map(u => (
+                <div key={u.n} className="border border-[#E4E0D4] rounded-xl p-3 mb-2 bg-white">
+                  <b className="font-['Playfair_Display']">{u.n}</b>
+                  <div className="text-xs text-[#6B7688] mt-1">{u.course} · APS {u.min}–{u.max} · Apply by {u.deadline}</div>
+                  <Btn size="sm" color="green" className="mt-2" onClick={() => showToast('Application started')}>Apply now</Btn>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-6 bg-white border border-[#E4E0D4] rounded-xl text-xs text-[#6B7688]">
+                {UNIS.length === 0 ? 'No university listings currently configured.' : 'No matching university options found for your current APS score.'}
               </div>
-            ))}
+            )}
           </div>
         </Card>
       )}

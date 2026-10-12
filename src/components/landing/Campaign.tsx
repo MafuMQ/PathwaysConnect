@@ -1,5 +1,6 @@
 import { Reveal } from '../ui/Reveal';
 import { CAMPAIGN } from '../../data/landingData';
+import { Check } from 'lucide-react';
 
 interface CampaignProps {
   setFormType: (type: string) => void;
@@ -18,7 +19,7 @@ export const Campaign = ({ setFormType }: CampaignProps) => {
           <p className="max-w-[52ch] text-[#EDF3EC]">We are supporting 100 learners through the full application journey for the 2027 academic year — completely free. Support includes:</p>
           <ul className="my-5 space-y-2">
             {['University, TVET and college application guidance', 'NSFAS bursary application support', 'Subject-choice and career guidance', 'Document checklists and deadline reminders', 'A trained volunteer mentor, subject to availability and successful matching'].map(li => (
-              <li key={li} className="flex gap-2"><span className="text-[#DFC98A] font-bold">✓</span> {li}</li>
+              <li key={li} className="flex items-center gap-2"><Check className="w-4 h-4 text-[#DFC98A] shrink-0" /> {li}</li>
             ))}
           </ul>
           <p className="text-sm text-[#EDF3EC] max-w-[56ch] mb-5">Jernuambo Pathways does not charge learners for support. Institution application fees, where applicable, remain the responsibility of the applicant unless a waiver or sponsored arrangement is confirmed.</p>

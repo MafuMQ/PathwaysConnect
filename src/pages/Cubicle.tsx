@@ -19,13 +19,7 @@ interface Tutor {
   isLive: boolean;
 }
 
-const mockTutors: Tutor[] = [
-  { id: "1", name: "Dr. Sarah Nkosi", subjects: ["Mathematics", "Statistics"], rating: 4.9, sessions: 187, rate: 150, bio: "PhD in Applied Mathematics. Specialises in helping students conquer calculus and linear algebra.", avatar: "👩🏾‍🏫", availability: ["Mon 10-12", "Wed 14-16", "Fri 9-11"], isLive: true },
-  { id: "2", name: "James van der Merwe", subjects: ["Physics", "Engineering"], rating: 4.7, sessions: 134, rate: 120, bio: "MSc Mechanical Engineering. Makes physics intuitive with real-world examples.", avatar: "👨🏻‍🔬", availability: ["Tue 13-15", "Thu 10-12"], isLive: false },
-  { id: "3", name: "Priya Govender", subjects: ["Chemistry", "Biology"], rating: 4.8, sessions: 156, rate: 130, bio: "BSc Honours in Biochemistry. Patient and thorough approach to science tutoring.", avatar: "👩🏽‍🔬", availability: ["Mon 14-16", "Wed 10-12", "Sat 9-12"], isLive: true },
-  { id: "4", name: "Tshepiso Mokoena", subjects: ["Computer Science", "Data Science"], rating: 4.6, sessions: 98, rate: 140, bio: "Software developer turned tutor. Covers Python, Java, algorithms and data structures.", avatar: "👨🏿‍💻", availability: ["Tue 16-18", "Thu 14-16", "Sun 10-12"], isLive: false },
-  { id: "5", name: "Fatima Abrahams", subjects: ["Accounting", "Economics"], rating: 4.9, sessions: 210, rate: 160, bio: "CA(SA) candidate. Breaks down complex accounting concepts into simple steps.", avatar: "👩🏽‍💼", availability: ["Mon 8-10", "Wed 16-18", "Fri 14-16"], isLive: false },
-];
+const initialTutors: Tutor[] = [];
 
 interface Session {
   id: string;
@@ -36,16 +30,13 @@ interface Session {
   status: "upcoming" | "completed";
 }
 
-const mockSessions: Session[] = [
-  { id: "s1", tutor: "Dr. Sarah Nkosi", subject: "Calculus II", date: "Mon, 7 Apr", time: "10:00 - 11:00", status: "upcoming" },
-  { id: "s2", tutor: "Priya Govender", subject: "Organic Chemistry", date: "Wed, 9 Apr", time: "10:00 - 11:30", status: "upcoming" },
-];
+const initialSessions: Session[] = [];
 
 const Cubicle = () => {
   const [search, setSearch] = useState("");
   const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
 
-  const filtered = mockTutors.filter((t) =>
+  const filtered = initialTutors.filter((t) =>
     t.name.toLowerCase().includes(search.toLowerCase()) ||
     t.subjects.some((s) => s.toLowerCase().includes(search.toLowerCase()))
   );
@@ -62,7 +53,7 @@ const Cubicle = () => {
       <Tabs defaultValue="browse">
         <TabsList className="mb-6">
           <TabsTrigger value="browse">Find Tutors</TabsTrigger>
-          <TabsTrigger value="sessions">My Sessions ({mockSessions.length})</TabsTrigger>
+          <TabsTrigger value="sessions">My Sessions ({initialSessions.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="browse">
@@ -133,11 +124,18 @@ const Cubicle = () => {
               </div>
             ))}
           </div>
+
+          {filtered.length === 0 && (
+            <div className="text-center py-16 text-muted-foreground">
+              <Video className="w-10 h-10 mx-auto mb-3 opacity-40" />
+              <p>No tutors currently available</p>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="sessions">
           <div className="space-y-3">
-            {mockSessions.map((session) => (
+            {initialSessions.map((session) => (
               <div key={session.id} className="bg-gradient-card rounded-xl border border-border p-5 shadow-card flex items-center gap-4">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                   <Video className="w-5 h-5 text-primary" />
@@ -154,7 +152,7 @@ const Cubicle = () => {
                 </Button>
               </div>
             ))}
-            {mockSessions.length === 0 && (
+            {initialSessions.length === 0 && (
               <div className="text-center py-16 text-muted-foreground">
                 <Video className="w-10 h-10 mx-auto mb-3 opacity-40" />
                 <p>No sessions booked yet</p>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 import { LOGO_SRC } from '../../data/landingData';
 
 export const Navbar = () => {
@@ -38,7 +39,7 @@ export const Navbar = () => {
             aria-label="Open menu"
             aria-expanded={menuOpen}
           >
-            {menuOpen ? '✕' : '☰'}
+            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>

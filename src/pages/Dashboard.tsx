@@ -7,10 +7,6 @@ const modules = [
   { to: "/app/profile", icon: FolderLock, name: "PROFILE", desc: "Manage your details & documents", color: "hsl(210 80% 60%)" },
   { to: "/app/spark", icon: Sun, name: "SPARK", desc: "Daily motivation", color: "hsl(38 92% 55%)" },
   { to: "/app/pulse", icon: Bell, name: "PULSE", desc: "News & updates", color: "hsl(50 85% 55%)" },
-  { to: "/app/societies", icon: Users, name: "SOCIETIES", desc: "Campus communities", color: "hsl(270 70% 65%)" },
-  { to: "/app/bazaar", icon: ShoppingBag, name: "BAZAAR", desc: "Student marketplace", color: "hsl(180 60% 50%)" },
-  { to: "/app/cubicle", icon: Video, name: "THE CUBICLE", desc: "Video tutoring", color: "hsl(160 70% 50%)" },
-  { to: "/app/graddesk", icon: GraduationCap, name: "GRAD DESK", desc: "Graduate tutors", color: "hsl(12 85% 60%)" },
 ];
 
 const Dashboard = () => {
@@ -38,7 +34,7 @@ const Dashboard = () => {
           { label: "Mentor Sessions", value: "0" },
           { label: "Documents", value: "0" },
           { label: "Connections", value: "0" },
-          { label: "Streak", value: "1 day" },
+          { label: "Streak", value: "0 days" },
         ].map((s) => (
           <div key={s.label} className="bg-gradient-card rounded-xl border border-border p-4 shadow-card">
             <div className="text-2xl font-display font-bold text-foreground">{s.value}</div>

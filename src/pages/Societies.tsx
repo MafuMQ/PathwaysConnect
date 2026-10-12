@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, Search, Plus, MessageSquare, Calendar, UserPlus, UserMinus, ChevronRight } from "lucide-react";
+import { Users, Search, Plus, MessageSquare, Calendar, UserPlus, UserMinus, ChevronRight, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -35,77 +35,7 @@ interface SocietyEvent {
   location: string;
 }
 
-const mockSocieties: Society[] = [
-  {
-    id: "1", name: "Tech & Innovation Society", category: "Academic", members: 342,
-    description: "For students passionate about technology, coding, AI and innovation. Weekly hackathons and workshops.",
-    color: "hsl(210 80% 60%)", icon: "💻",
-    posts: [
-      { id: "p1", author: "Thabo M.", content: "Who's joining the hackathon this Saturday? We need a team of 4!", time: "2h ago", likes: 12 },
-      { id: "p2", author: "Naledi K.", content: "Just finished my first React project! Thanks to everyone who helped 🎉", time: "5h ago", likes: 24 },
-    ],
-    events: [
-      { id: "e1", title: "Weekend Hackathon", date: "Sat, 5 Apr", location: "Engineering Building, Lab 3" },
-      { id: "e2", title: "AI Workshop: Intro to LLMs", date: "Wed, 9 Apr", location: "Online (Zoom)" },
-    ],
-  },
-  {
-    id: "2", name: "Debate & Public Speaking", category: "Culture", members: 189,
-    description: "Sharpen your argumentation and public speaking skills. Compete in inter-university debates.",
-    color: "hsl(340 80% 60%)", icon: "🎤",
-    posts: [
-      { id: "p3", author: "Sipho N.", content: "Motion for next week: 'This house believes AI will replace most jobs within 20 years'", time: "1h ago", likes: 8 },
-    ],
-    events: [
-      { id: "e3", title: "Inter-Varsity Debate Finals", date: "Fri, 11 Apr", location: "Main Auditorium" },
-    ],
-  },
-  {
-    id: "3", name: "Entrepreneurship Club", category: "Business", members: 256,
-    description: "Connect with fellow student entrepreneurs. Pitch nights, mentorship, and funding opportunities.",
-    color: "hsl(38 92% 55%)", icon: "🚀",
-    posts: [
-      { id: "p4", author: "Amahle D.", content: "Looking for a co-founder for my EdTech startup. DM me if interested!", time: "3h ago", likes: 31 },
-      { id: "p5", author: "Kagiso T.", content: "Pitch Night results are in! Congrats to EcoWash for winning R5,000 seed funding 🏆", time: "1d ago", likes: 45 },
-    ],
-    events: [
-      { id: "e4", title: "Monthly Pitch Night", date: "Thu, 17 Apr", location: "Business School, Room 201" },
-    ],
-  },
-  {
-    id: "4", name: "Sports & Recreation", category: "Sports", members: 478,
-    description: "Stay active! Join leagues, casual games, and fitness sessions across campus.",
-    color: "hsl(160 70% 50%)", icon: "⚽",
-    posts: [
-      { id: "p6", author: "Bongani L.", content: "Soccer practice moved to 5pm today due to rain earlier", time: "30m ago", likes: 5 },
-    ],
-    events: [
-      { id: "e5", title: "Inter-Res Soccer Tournament", date: "Sat, 12 Apr", location: "Main Sports Field" },
-    ],
-  },
-  {
-    id: "5", name: "Community Outreach", category: "Community", members: 134,
-    description: "Making a difference beyond campus. Volunteer programs, drives, and community partnerships.",
-    color: "hsl(270 70% 65%)", icon: "🤝",
-    posts: [
-      { id: "p7", author: "Lerato P.", content: "Thank you to everyone who helped at the food drive! We collected over 200kg of food 🙏", time: "6h ago", likes: 52 },
-    ],
-    events: [
-      { id: "e6", title: "Township Tutoring Saturday", date: "Sat, 5 Apr", location: "Khayelitsha Community Hall" },
-    ],
-  },
-  {
-    id: "6", name: "Arts & Culture Collective", category: "Culture", members: 167,
-    description: "Celebrate creativity through visual arts, music, dance, and cultural events.",
-    color: "hsl(12 85% 60%)", icon: "🎨",
-    posts: [
-      { id: "p8", author: "Zanele M.", content: "Art exhibition submissions close Friday! Theme: 'Identity in the Digital Age'", time: "4h ago", likes: 18 },
-    ],
-    events: [
-      { id: "e7", title: "Heritage Day Celebration", date: "Mon, 21 Apr", location: "Student Centre" },
-    ],
-  },
-];
+const initialSocieties: Society[] = [];
 
 const categories = ["All", "Academic", "Business", "Culture", "Sports", "Community"];
 
@@ -113,11 +43,11 @@ const Societies = () => {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-  const [joined, setJoined] = useState<Set<string>>(new Set(["1", "3"]));
+  const [joined, setJoined] = useState<Set<string>>(new Set());
   const [selectedSociety, setSelectedSociety] = useState<Society | null>(null);
   const [newPost, setNewPost] = useState("");
 
-  const filtered = mockSocieties.filter((s) => {
+  const filtered = initialSocieties.filter((s) => {
     const matchSearch = s.name.toLowerCase().includes(search.toLowerCase());
     const matchCat = activeCategory === "All" || s.category === activeCategory;
     return matchSearch && matchCat;
@@ -263,7 +193,9 @@ const Societies = () => {
                       <span className="text-xs text-muted-foreground">{post.time}</span>
                     </div>
                     <p className="text-sm text-muted-foreground">{post.content}</p>
-                    <span className="text-xs text-muted-foreground mt-2 inline-block">❤️ {post.likes}</span>
+                    <span className="text-xs text-muted-foreground mt-2 inline-flex items-center gap-1">
+                      <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" /> {post.likes}
+                    </span>
                   </div>
                 ))}
               </TabsContent>

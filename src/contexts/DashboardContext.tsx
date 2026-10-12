@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { MENTORS, BAZAAR, TUTORS, SPARK } from '../data/dashboardData';
+import { MENTORS, SPARK } from '../data/dashboardData';
 import { useAuth } from './AuthContext';
+import { Check } from 'lucide-react';
 
 interface DashboardState {
   name: string;
   role: string;
   faith: string;
   career: string;
-  coins: number;
   streak: number;
   aps: number | null;
   ready: number | null;
@@ -15,7 +15,6 @@ interface DashboardState {
   docs: any[];
   matches: any[];
   deckIdx: number;
-  tx: { t: string; v: number }[];
   applied: Record<string, boolean>;
   answered: number;
   correct: number;
@@ -29,15 +28,11 @@ interface DashboardContextType {
   setModal: React.Dispatch<React.SetStateAction<{ title: string; content: React.ReactNode } | null>>;
   toast: string;
   showToast: (msg: string) => void;
-  updateCoins: (v: number, label: string) => void;
   handleOnboard: (name: string, role: string, faith: string) => void;
   newSpark: () => void;
   sparkI: number;
   swipe: (like: boolean, navigateToVault: () => void) => void;
   applyOpp: (id: string) => void;
-  donate: () => void;
-  buyItem: (i: number) => void;
-  bookTutor: (i: number) => void;
   uploadDoc: (i: number) => Promise<void>;
   deleteDoc: (i: number) => Promise<void>;
   updateMark: (subject: string, score: number) => Promise<void>;
@@ -58,12 +53,11 @@ const DEFAULT_DOCS = [
 
 export const DashboardProvider = ({ children }: { children: React.ReactNode }) => {
   const [S, setS] = useState<DashboardState>({
-    name: '', role: 'Learner', faith: 'Christianity', career: 'Health Sciences',
-    coins: 120, streak: 1, aps: null, ready: null,
+    name: '', role: 'Learner', faith: 'None', career: '',
+    streak: 0, aps: null, ready: null,
     marks: DEFAULT_MARKS,
     docs: DEFAULT_DOCS,
     matches: [], deckIdx: 0,
-    tx: [{ t: 'Welcome bonus — verified registration', v: 100 }, { t: 'Referred a new verified user', v: 20 }],
     applied: {}, answered: 0, correct: 0, mistakes: []
   });
 
@@ -74,7 +68,7 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
       setS(prev => ({
         ...prev,
         name: user.name || prev.name,
-        role: user.role || prev.role,
+        role: 'Learner',
         marks: user.marks !== undefined ? user.marks : DEFAULT_MARKS,
         docs: user.docs !== undefined ? user.docs : DEFAULT_DOCS
       }));
@@ -92,14 +86,10 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
     setToastId(setTimeout(() => setToast(''), 2600));
   };
 
-  const updateCoins = (v: number, label: string) => {
-    setS(prev => ({ ...prev, coins: prev.coins + v, tx: [{ t: label, v }, ...prev.tx] }));
-    showToast(`${v > 0 ? '+' : ''}${v} PathwayCoin · ${label}`);
-  };
-
-  const handleOnboard = (name: string, role: string, faith: string) => {
-    setS(prev => ({ ...prev, name: name || 'Sipho', role, faith }));
-    showToast(`Welcome to PathwaysConnect, ${name || 'Sipho'} — you are verified ✅`);
+  const handleOnboard = (name: string, _role: string, faith: string) => {
+    const displayName = name || user?.name || '';
+    setS(prev => ({ ...prev, name: displayName, role: 'Learner', faith }));
+    showToast(`Welcome to PathwaysConnect${displayName ? ', ' + displayName : ''} — you are verified`);
   };
 
   const newSpark = () => {
@@ -108,7 +98,7 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
   };
 
   const swipe = (like: boolean, navigateToVault: () => void) => {
-    if (S.deckIdx >= MENTORS.length) return;
+    if (S.deckIdx >= MENTORS.length || !MENTORS[S.deckIdx]) return;
     const m = MENTORS[S.deckIdx];
     setS(prev => ({ ...prev, deckIdx: prev.deckIdx + 1, matches: like ? [...prev.matches, m] : prev.matches }));
     if (like) {
@@ -116,7 +106,9 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
         title: "It's a match!",
         content: (
           <div className="text-center">
-            <div className="text-4xl mb-2">🎉</div>
+            <div className="w-12 h-12 rounded-full bg-[#E7F2EA] text-[#1E6B3C] flex items-center justify-center mx-auto mb-2 font-bold text-xl">
+              <Check className="w-6 h-6" />
+            </div>
             <div className="font-['Playfair_Display'] font-bold text-xl text-[#1A3A5C]">{m.n} accepted your request.</div>
             <div className="text-sm text-[#6B7688] my-3">A shared VAULT space has been created — your document checklist is already inside.</div>
             <div className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-4" style={{ background: m.c }}>{m.i}</div>
@@ -131,27 +123,7 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
   const applyOpp = (id: string) => {
     setS(prev => ({ ...prev, applied: { ...prev.applied, [id]: true } }));
     setModal(null);
-    updateCoins(5, 'Application submitted 🎯');
-    showToast('Submitted & tracked: Found → Matched → Submitted ▸ Interview ▸ Offer');
-  };
-
-  const donate = () => {
-    if (S.coins < 50) return showToast('Not enough PathwayCoin — top up in your wallet');
-    updateCoins(-50, 'Fund a Future donation');
-    showToast('Matched by Standard Bank! 90% student · 5% Food Bank · 5% platform · 18A emailed 📧');
-  };
-
-  const buyItem = (i: number) => {
-    const b = BAZAAR[i];
-    if (S.coins < b.p) return showToast('Not enough PathwayCoin');
-    updateCoins(-b.p, 'Bazaar · ' + b.n);
-  };
-
-  const bookTutor = (i: number) => {
-    const t = TUTORS[i];
-    if (S.coins < t.r) return showToast('Not enough PathwayCoin');
-    updateCoins(-t.r, 'Cubicle session · ' + t.n);
-    showToast(`Booked! ${t.n} earns ${Math.round(t.r * .88)} PC instantly`);
+    showToast('Application submitted & tracked');
   };
 
   const uploadDoc = async (i: number) => {
@@ -161,7 +133,7 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
     if (user) {
       await updateProfile({ docs: newDocs });
     }
-    showToast('Uploaded & encrypted 🔒 Opportunity scores recalculated');
+    showToast('Uploaded & encrypted. Opportunity scores recalculated');
   };
 
   const deleteDoc = async (i: number) => {
@@ -175,7 +147,7 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
     if (user) {
       await updateProfile({ docs: newDocs });
     }
-    showToast('Document removed 🗑️');
+    showToast('Document removed');
   };
 
   const updateMark = async (subject: string, score: number) => {
@@ -197,7 +169,7 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
 
   return (
     <DashboardContext.Provider value={{
-      S, setS, modal, setModal, toast, showToast, updateCoins, handleOnboard, newSpark, sparkI, swipe, applyOpp, donate, buyItem, bookTutor, uploadDoc, deleteDoc, updateMark, deleteMark
+      S, setS, modal, setModal, toast, showToast, handleOnboard, newSpark, sparkI, swipe, applyOpp, uploadDoc, deleteDoc, updateMark, deleteMark
     }}>
       {children}
     </DashboardContext.Provider>
