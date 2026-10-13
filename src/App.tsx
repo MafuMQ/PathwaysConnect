@@ -10,7 +10,7 @@ import Signup from "./pages/Signup.tsx";
 import Home from "./pages/Home.tsx";
 import Onboard from "./pages/Onboard.tsx";
 import Connect from "./pages/Connect.tsx";
-import Study from "./pages/Study.tsx";
+import AcademicRecord from "./pages/AcademicRecord.tsx";
 import Profile from "./pages/Profile.tsx";
 import Opps from "./pages/Opps.tsx";
 import AppLayout from "./components/layout/AppLayout.tsx";
@@ -44,7 +44,9 @@ const AppRoutes = () => (
       <Route path="pulse" element={<Navigate to="/app" replace />} />
       <Route path="onboard" element={<Onboard />} />
       <Route path="connect" element={<Connect />} />
-      <Route path="study" element={<Study />} />
+      <Route path="academic-record" element={<AcademicRecord />} />
+      <Route path="academic" element={<Navigate to="/app/academic-record" replace />} />
+      <Route path="study" element={<Navigate to="/app/academic-record" replace />} />
       <Route path="profile" element={<Profile />} />
       <Route path="opps" element={<Opps />} />
     </Route>

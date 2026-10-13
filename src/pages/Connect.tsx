@@ -165,7 +165,7 @@ const Connect = () => {
                         <Btn 
                           size="sm" 
                           color="ghost" 
-                          onClick={() => navigate('/app/study', { state: { tab: 'vault' } })}
+                          onClick={() => navigate('/app/academic-record', { state: { tab: 'vault' } })}
                           className="shrink-0"
                         >
                           <MessageSquare className="w-3.5 h-3.5" /> Vault Chat
@@ -232,7 +232,7 @@ const Connect = () => {
                       size="sm" 
                       color="navy" 
                       className="flex-1"
-                      onClick={() => navigate('/app/study', { state: { tab: 'vault' } })}
+                      onClick={() => navigate('/app/academic-record', { state: { tab: 'vault' } })}
                     >
                       <MessageSquare className="w-3.5 h-3.5" /> Open Shared Vault
                     </Btn>

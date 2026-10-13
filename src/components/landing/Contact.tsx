@@ -81,7 +81,7 @@ export const Contact = ({ formType, setFormType }: ContactProps) => {
               <button
                 key={type}
                 onClick={() => { setFormType(type); setSuccess(false); }}
-                className={`bg-white border rounded-full px-5 py-2.5 uppercase tracking-wider text-xs font-semibold font-['Oswald',sans-serif] transition-colors ${formType === type ? 'bg-[#1E6B3C] border-[#1E6B3C] text-white' : 'border-[#CFC5AF] text-[#1A3A5C] hover:border-[#C9A84C]'}`}
+                className={`border rounded-full px-5 py-2.5 uppercase tracking-wider text-xs font-semibold font-['Oswald',sans-serif] transition-colors ${formType === type ? 'bg-[#1E6B3C] border-[#1E6B3C] text-white' : 'bg-white border-[#CFC5AF] text-[#1A3A5C] hover:border-[#C9A84C]'}`}
               >
                 {TAB_CONFIG[type as keyof typeof TAB_CONFIG].label}
               </button>

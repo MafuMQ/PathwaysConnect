@@ -2,34 +2,45 @@ import React from 'react';
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { DashboardProvider, useDashboard } from "@/contexts/DashboardContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Users, GraduationCap, Target, User, LogOut } from "lucide-react";
+import { Home, Users, GraduationCap, Target, User, LogOut, BookOpen, ExternalLink } from "lucide-react";
 import { LOGO_SRC } from "@/data/landingData";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-const NavBtnMobile = ({ active, icon: Icon, label, onClick }: { 
+const NavBtnMobile = ({ active, icon: Icon, label, onClick, external }: { 
   active: boolean; 
   icon: React.ComponentType<{ className?: string }>; 
   label: string; 
   onClick: () => void;
+  external?: boolean;
 }) => (
   <button onClick={onClick} className={`flex-1 flex flex-col items-center gap-1 py-1.5 text-[9px] font-bold tracking-wide transition-colors ${active ? 'text-[#1A3A5C]' : 'text-[#94A0B2]'}`}>
-    <Icon className={`w-5 h-5 transition-transform ${active ? '-translate-y-0.5 text-[#1A3A5C]' : 'opacity-65'}`} />
-    {label}
+    <div className="relative">
+      <Icon className={`w-5 h-5 transition-transform ${active ? '-translate-y-0.5 text-[#1A3A5C]' : 'opacity-65'}`} />
+      {external && <ExternalLink className="w-2.5 h-2.5 absolute -top-1 -right-2 text-[#94A0B2]" />}
+    </div>
+    <span className="truncate max-w-[50px]">{label}</span>
   </button>
 );
 
 const sidebarNavItems = [
   { id: 'home', icon: Home, label: 'Home' },
   { id: 'connect', icon: Users, label: 'Connect' },
-  { id: 'study', icon: GraduationCap, label: 'Study' },
+  { id: 'academic-record', icon: GraduationCap, label: 'Academic Record' },
   { id: 'opps', icon: Target, label: 'Opps' },
+  { id: 'study', icon: BookOpen, label: 'Study', external: 'https://anaise.vercel.app/' },
 ];
 
 const mobileNavItems = [
   { id: 'home', icon: Home, label: 'Home' },
   { id: 'connect', icon: Users, label: 'Connect' },
-  { id: 'study', icon: GraduationCap, label: 'Study' },
+  { id: 'academic-record', icon: GraduationCap, label: 'Academic' },
   { id: 'opps', icon: Target, label: 'Opps' },
-  { id: 'profile', icon: User, label: 'Profile' },
+  { id: 'study', icon: BookOpen, label: 'Study', external: 'https://anaise.vercel.app/' },
 ];
 
 const DashboardShell = () => {
@@ -65,16 +76,29 @@ const DashboardShell = () => {
           </div>
           
           <nav className="flex-1 overflow-y-auto p-4 space-y-2">
-            {sidebarNavItems.map(({ id, icon: Icon, label }) => {
-              const active = (currentScreen === id && !isHome) || (isHome && id === 'home');
+            {sidebarNavItems.map(({ id, icon: Icon, label, external }) => {
+              const active = !external && (
+                (currentScreen === id && !isHome) || 
+                (isHome && id === 'home') || 
+                (id === 'academic-record' && (currentScreen === 'academic' || currentScreen === 'study' || currentScreen === 'academic-record'))
+              );
               return (
                 <button 
                   key={id} 
-                  onClick={() => navigate(id === 'home' ? '/app' : `/app/${id}`)} 
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold tracking-wide transition-colors ${active ? 'bg-gradient-to-br from-[#D9BC6B] to-[#C9A84C] text-[#10263D] shadow-md' : 'text-[#B9CBDD] hover:bg-white/10 hover:text-white'}`}
+                  onClick={() => {
+                    if (external) {
+                      window.open(external, '_blank', 'noopener,noreferrer');
+                    } else {
+                      navigate(id === 'home' ? '/app' : `/app/${id}`);
+                    }
+                  }} 
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold tracking-wide transition-colors ${active ? 'bg-gradient-to-br from-[#D9BC6B] to-[#C9A84C] text-[#10263D] shadow-md' : 'text-[#B9CBDD] hover:bg-white/10 hover:text-white'}`}
                 >
-                  <Icon className="w-5 h-5 shrink-0" />
-                  <span>{label}</span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Icon className="w-5 h-5 shrink-0" />
+                    <span className="truncate">{label}</span>
+                  </div>
+                  {external && <ExternalLink className="w-3.5 h-3.5 opacity-60 shrink-0 ml-1" />}
                 </button>
               );
             })}
@@ -131,13 +155,47 @@ const DashboardShell = () => {
                 <small className="block text-[8px] tracking-[3px] text-[#C9A84C] font-bold">— PATHWAYS —</small>
               </div>
             </div>
-            <button 
-              onClick={handleLogout} 
-              className="text-[#8FA5BB] hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10"
-              title="Logout"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
+            {/* Mobile Top Right Profile Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button 
+                  className={`flex items-center gap-1.5 p-1 rounded-full outline-none transition-all ${
+                    currentScreen === 'profile'
+                      ? 'ring-2 ring-[#C9A84C] bg-white/10'
+                      : 'hover:bg-white/10'
+                  }`}
+                  title="Profile & Settings"
+                >
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 shadow-sm ${
+                    currentScreen === 'profile'
+                      ? 'bg-[#D9BC6B] text-[#10263D]'
+                      : 'bg-white/20 text-[#C9A84C] border border-white/25'
+                  }`}>
+                    {user?.name ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) : <User className="w-4 h-4" />}
+                  </div>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52 p-2 bg-white text-[#10263D] shadow-2xl rounded-2xl border border-[#E4E0D4] font-['Inter']">
+                <div className="px-2 py-1.5 border-b border-[#E4E0D4] mb-1">
+                  <div className="font-bold text-sm text-[#1A3A5C] truncate">{S.name || user?.name || 'Learner'}</div>
+                  <div className="text-[11px] text-[#6B7688] font-semibold truncate">{user?.email || 'Learner Profile'}</div>
+                </div>
+                <DropdownMenuItem 
+                  onClick={() => navigate('/app/profile')}
+                  className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-bold text-[#1A3A5C] hover:bg-[#F6EFD9] cursor-pointer"
+                >
+                  <User className="w-4 h-4 text-[#C9A84C]" />
+                  <span>My Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={handleLogout}
+                  className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4 text-red-600" />
+                  <span>Sign Out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
 
@@ -149,15 +207,26 @@ const DashboardShell = () => {
         {/* Mobile Bottom Nav */}
         {currentScreen !== 'onboard' && (
           <div className="md:hidden bg-white border-t border-[#E4E0D4] flex p-1.5 pb-safe z-40 shrink-0 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-            {mobileNavItems.map(({ id, icon: Icon, label }) => {
-              const active = (currentScreen === id && !isHome) || (isHome && id === 'home');
+            {mobileNavItems.map(({ id, icon: Icon, label, external }) => {
+              const active = !external && (
+                (currentScreen === id && !isHome) || 
+                (isHome && id === 'home') || 
+                (id === 'academic-record' && (currentScreen === 'academic' || currentScreen === 'study' || currentScreen === 'academic-record'))
+              );
               return (
                 <NavBtnMobile 
                   key={id} 
                   active={active} 
                   icon={Icon} 
                   label={label} 
-                  onClick={() => navigate(id === 'home' ? '/app' : `/app/${id}`)} 
+                  external={!!external}
+                  onClick={() => {
+                    if (external) {
+                      window.open(external, '_blank', 'noopener,noreferrer');
+                    } else {
+                      navigate(id === 'home' ? '/app' : `/app/${id}`);
+                    }
+                  }} 
                 />
               );
             })}

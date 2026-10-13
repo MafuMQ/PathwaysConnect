@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { Card, Eyebrow, Title, Sub, Btn } from '@/components/dashboard/ui/DashboardUI';
-import { BookOpen, ShieldCheck, ArrowRight } from "lucide-react";
+import { BookOpen, ShieldCheck, ArrowRight, LogOut } from "lucide-react";
 
 const roleLabels: Record<string, string> = {
   learner: "Learner",
@@ -11,7 +11,7 @@ const roleLabels: Record<string, string> = {
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, logout } = useAuth();
   const { showToast } = useDashboard();
   
   const [editing, setEditing] = useState(false);
@@ -39,6 +39,16 @@ const Profile = () => {
     } catch (e) {
       console.error(e);
       showToast("Failed to update profile");
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (e) {
+      console.error(e);
+      showToast("Failed to sign out");
     }
   };
 
@@ -111,9 +121,9 @@ const Profile = () => {
           )}
         </Card>
 
-        {/* Academic Hub Quick Links (moved to Study) */}
+        {/* Academic Hub Quick Links */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Card className="hover:border-[#C9A84C]/50 transition-colors cursor-pointer" onClick={() => navigate('/app/study', { state: { tab: 'academic' } })}>
+          <Card className="hover:border-[#C9A84C]/50 transition-colors cursor-pointer" onClick={() => navigate('/app/academic-record', { state: { tab: 'academic' } })}>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#E7F2EA] text-[#1E6B3C] flex items-center justify-center shrink-0">
                 <BookOpen className="w-5 h-5" />
@@ -124,13 +134,13 @@ const Profile = () => {
                   <ArrowRight className="w-4 h-4 text-[#8FA5BB]" />
                 </div>
                 <p className="text-xs text-[#6B7688] mt-1">
-                  Manage your school, grade, curriculum, and registered subjects inside Study.
+                  Manage your school, grade, curriculum, and registered subjects inside Academic Record.
                 </p>
               </div>
             </div>
           </Card>
 
-          <Card className="hover:border-[#C9A84C]/50 transition-colors cursor-pointer" onClick={() => navigate('/app/study', { state: { tab: 'vault' } })}>
+          <Card className="hover:border-[#C9A84C]/50 transition-colors cursor-pointer" onClick={() => navigate('/app/academic-record', { state: { tab: 'vault' } })}>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#F6EFD9] text-[#C9A84C] flex items-center justify-center shrink-0">
                 <ShieldCheck className="w-5 h-5 text-[#10263D]" />
@@ -141,12 +151,30 @@ const Profile = () => {
                   <ArrowRight className="w-4 h-4 text-[#8FA5BB]" />
                 </div>
                 <p className="text-xs text-[#6B7688] mt-1">
-                  Access your encrypted documents, ID, and academic reports inside Study.
+                  Access your encrypted documents, ID, and academic reports inside Academic Record.
                 </p>
               </div>
             </div>
           </Card>
         </div>
+
+        {/* Sign Out Section under Profile */}
+        <Card className="border border-red-200/80 bg-white shadow-xs">
+          <div className="flex items-center justify-between">
+            <div>
+              <b className="font-['Playfair_Display'] text-base text-[#1A3A5C] block">Account Session</b>
+              <p className="text-xs text-[#6B7688] mt-0.5">Sign out of your PathwaysConnect account</p>
+            </div>
+            <Btn 
+              size="sm" 
+              color="ghost" 
+              className="text-red-600 hover:bg-red-50 hover:text-red-700 font-bold border border-red-200"
+              onClick={handleLogout}
+            >
+              <LogOut className="w-4 h-4 mr-1.5" /> Sign Out
+            </Btn>
+          </div>
+        </Card>
       </div>
     </div>
   );

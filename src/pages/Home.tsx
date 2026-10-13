@@ -79,7 +79,7 @@ const Home = () => {
 
       <Card>
         <Eyebrow>What needs you today</Eyebrow>
-        <div className="flex gap-3 py-3 border-b border-[#E4E0D4] cursor-pointer" onClick={() => navigate('/app/study', { state: { tab: 'vault' } })}>
+        <div className="flex gap-3 py-3 border-b border-[#E4E0D4] cursor-pointer" onClick={() => navigate('/app/academic-record', { state: { tab: 'vault' } })}>
           <div className="w-9 h-9 rounded-xl bg-[#F6EFD9] flex items-center justify-center text-[#1A3A5C] shrink-0">
             <FolderArchive className="w-5 h-5 text-[#A8862F]" />
           </div>

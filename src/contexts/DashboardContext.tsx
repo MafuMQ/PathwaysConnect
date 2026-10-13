@@ -37,6 +37,7 @@ interface DashboardContextType {
   deleteDoc: (i: number) => Promise<void>;
   updateMark: (subject: string, score: number) => Promise<void>;
   deleteMark: (subject: string) => Promise<void>;
+  applyScannedResults: (newMarks: Record<string, number>, docToSave?: { name: string; url?: string }) => Promise<void>;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -73,7 +74,7 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
         docs: user.docs !== undefined ? user.docs : DEFAULT_DOCS
       }));
     }
-  }, [user?.id]);
+  }, [user]);
 
   const [modal, setModal] = useState<{ title: string; content: React.ReactNode } | null>(null);
   const [toast, setToast] = useState('');
@@ -167,9 +168,31 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
     }
   };
 
+  const applyScannedResults = async (
+    newMarks: Record<string, number>, 
+    docToSave?: { name: string; url?: string }
+  ) => {
+    // Completely override existing marks with newly scanned marks
+    const finalMarks = { ...newMarks };
+    const newDocs = [...S.docs];
+    if (docToSave) {
+      newDocs.unshift({
+        n: docToSave.name || 'Scanned Academic Document',
+        ok: true,
+        d: `Uploaded via AI Scanner · ${new Date().toLocaleDateString('en-ZA')}`,
+        url: docToSave.url
+      });
+    }
+    setS(prev => ({ ...prev, marks: finalMarks, docs: newDocs }));
+    if (user) {
+      await updateProfile({ marks: finalMarks, docs: newDocs });
+    }
+    showToast('Academic marks and document updated!');
+  };
+
   return (
     <DashboardContext.Provider value={{
-      S, setS, modal, setModal, toast, showToast, handleOnboard, newSpark, sparkI, swipe, applyOpp, uploadDoc, deleteDoc, updateMark, deleteMark
+      S, setS, modal, setModal, toast, showToast, handleOnboard, newSpark, sparkI, swipe, applyOpp, uploadDoc, deleteDoc, updateMark, deleteMark, applyScannedResults
     }}>
       {children}
     </DashboardContext.Provider>
